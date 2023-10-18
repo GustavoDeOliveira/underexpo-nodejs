@@ -1,0 +1,1754 @@
+openapi: 3.0.3
+info:
+  title: Swagger UnderExpo - OpenAPI 3.0
+  description: Definição OpenAPI 3.0 para a API do projeto UnderExpo.
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: gustavo.oliveira@aluno.riogrande.ifrs.edu.br
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+servers:
+- url: http://localhost:8080/api/v1
+tags:
+- name: exposição
+  description: Informações e operações relacionadas às exposições
+- name: perfil
+  description: Informações e operações relacionadas aos perfis de usuários
+paths:
+  /expo:
+    get:
+      tags:
+      - exposição
+      summary: Buscar exposições publicadas com paginação
+      description: "Busca exposições que tenham sido disponibilizadas ao público,\
+        \ permitindo paginação."
+      operationId: buscarExposicoesPublicadas
+      parameters:
+      - name: pagina
+        in: query
+        description: Página atual da busca
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: quantidade
+        in: query
+        description: Quantidade de registros a serem buscados
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        "200":
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResumoExposicao'
+                x-content-type: application/json
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResumoExposicao'
+        "400":
+          description: requisição inválida
+      security:
+      - underexpo_auth:
+        - read:expo
+      x-swagger-router-controller: Exposio
+    post:
+      tags:
+      - exposição
+      summary: Organizar uma nova exposição
+      description: Adiciona uma nova exposição em modo rascunho
+      operationId: organizarExposicao
+      requestBody:
+        description: Create a new pet in the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovaExposicao'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/NovaExposicao'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NovaExposicao'
+        required: true
+      responses:
+        "201":
+          description: criada com sucesso
+          headers:
+            location:
+              description: onde o novo recurso pode ser encontrado
+              style: simple
+              explode: false
+              schema:
+                type: string
+                example: http://localhost:8080/api/v1/expo/10
+        "400":
+          description: dados invalidos
+      security:
+      - underexpo_auth:
+        - write:expo
+        - read:expo
+      x-swagger-router-controller: Exposio
+  /expo/{expoId}:
+    get:
+      tags:
+      - exposição
+      summary: Carregar uma exposição a partir do seu ID
+      description: "Retorna uma única exposição, com uma lista de painéis."
+      operationId: carregarExposicaoPorId
+      parameters:
+      - name: expoId
+        in: path
+        description: ID da exposição a ser carregada
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exposicao'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Exposicao'
+        "400":
+          description: id fornecido é inválido
+        "404":
+          description: exposição não encontrada
+      security:
+      - api_key: []
+      - underexpo_auth:
+        - read:expo
+      x-swagger-router-controller: Exposio
+    put:
+      tags:
+      - exposição
+      summary: Alterar informações em uma exposição
+      description: |-
+        Atualiza as informações de uma exposição.
+        Também irá alterar a ordem dos paineis que forem informados
+      operationId: atualizarExposicao
+      parameters:
+      - name: expoId
+        in: path
+        description: ID da exposição cujas informações serão atualizadas
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Conteúdos que serão atualizados na exposição. Campos não informados
+          não serão alterados.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtualizacaoExposicao'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/AtualizacaoExposicao'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AtualizacaoExposicao'
+        required: true
+      responses:
+        "200":
+          description: operacao bem sucedida
+        "400":
+          description: id fornecido é inválido
+        "404":
+          description: exposição não encontrada
+      security:
+      - underexpo_auth:
+        - write:expo
+        - read:expo
+      x-swagger-router-controller: Exposio
+    delete:
+      tags:
+      - exposição
+      summary: Remover uma exposição
+      description: |-
+        Remove uma exposição e seus painéis.
+        Pode ser feito apenas em exposições que não possuam painéis e estejam em modo rascunho.
+      operationId: removerExposicao
+      parameters:
+      - name: expoId
+        in: path
+        description: ID da exposição cujas informações serão atualizadas
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: operacao bem sucedida
+        "400":
+          description: id fornecido é inválido
+        "404":
+          description: exposição não encontrada
+        "409":
+          description: não é possível excluir o recurso no momento
+      security:
+      - underexpo_auth:
+        - write:expo
+        - read:expo
+      x-swagger-router-controller: Exposio
+  /expo/{expoId}/denuncia:
+    post:
+      tags:
+      - exposição
+      summary: Denunciar uma exposição a partir do seu ID
+      description: Cria uma denúncia associada a exposição com o ID informado
+      operationId: denunciarExposicao
+      parameters:
+      - name: expoId
+        in: path
+        description: ID da exposição a ser denunciada
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Criar uma denúncia com uma descrição dos fatores ofensivos
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovaDenuncia'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/NovaDenuncia'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NovaDenuncia'
+        required: true
+      responses:
+        "200":
+          description: operação bem sucedida
+        "400":
+          description: id fornecido é inválido
+        "404":
+          description: exposição não encontrada
+      security:
+      - api_key: []
+      - underexpo_auth:
+        - read:expo
+      x-swagger-router-controller: Exposio
+  /expo/{expoId}/miniatura:
+    put:
+      tags:
+      - exposição
+      summary: Adicionar uma imagem de miniatura a uma exposição
+      description: Carrega uma nova imagem como miniatura para a exposição
+      operationId: adicionarMiniaturaExposicao
+      parameters:
+      - name: expoId
+        in: path
+        description: ID da exposição cuja miniatura será atualizada
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Imagem que será carregada como miniatura
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        "200":
+          description: operacao bem sucedida
+        "400":
+          description: id fornecido é inválido
+        "404":
+          description: exposição não encontrada
+        "413":
+          description: conteúdo muito grande
+        "415":
+          description: tipo de mídia não suportado
+      security:
+      - underexpo_auth:
+        - write:expo
+        - read:expo
+      x-swagger-router-controller: Exposio
+    delete:
+      tags:
+      - exposição
+      summary: Remover a imagem de miniatura de uma exposição
+      description: "Remove a imagem de miniatura da exposição, caso possua"
+      operationId: removerMiniaturaExposicao
+      parameters:
+      - name: expoId
+        in: path
+        description: ID da exposição cuja miniatura será removida
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: operacao bem sucedida
+        "400":
+          description: id fornecido é inválido
+        "404":
+          description: exposição não encontrada ou já não possuía miniatura
+      security:
+      - underexpo_auth:
+        - write:expo
+        - read:expo
+      x-swagger-router-controller: Exposio
+  /expo/{expoId}/painel:
+    post:
+      tags:
+      - exposição
+      summary: Criar um painel em uma exposição
+      description: "Cria um painel, e envia um convite para o artista informado."
+      operationId: CriarPainel
+      parameters:
+      - name: expoId
+        in: path
+        description: ID da exposição onde o painel será criado
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Informações do painel que será criado.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovoPainel'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/NovoPainel'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NovoPainel'
+        required: true
+      responses:
+        "201":
+          description: criada com sucesso
+          headers:
+            location:
+              description: onde o novo recurso pode ser encontrado
+              style: simple
+              explode: false
+              schema:
+                type: string
+                example: http://localhost:8080/api/v1/expo/10/painel/11
+        "400":
+          description: dados inválidos
+        "404":
+          description: exposição ou usuário não encontrados
+      security:
+      - api_key: []
+      - underexpo_auth:
+        - read:expo
+        - write:expo
+      x-swagger-router-controller: Exposio
+  /expo/{expoId}/painel/{painelId}:
+    get:
+      tags:
+      - exposição
+      summary: Carregar um painel de uma exposição a partir de seus IDs
+      description: "Retorna um único painel, com uma lista de seus elementos."
+      operationId: carregarPainelPorId
+      parameters:
+      - name: expoId
+        in: path
+        description: ID da exposição cujo o painel a ser carregado pertence
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      - name: painelId
+        in: path
+        description: ID do painel a ser carregado
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Painel'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Painel'
+        "400":
+          description: um dos ids fornecidos é inválido
+        "404":
+          description: painel não encontrado
+      security:
+      - api_key: []
+      - underexpo_auth:
+        - read:expo
+      x-swagger-router-controller: Exposio
+    put:
+      tags:
+      - exposição
+      summary: Alterar informações de um painel
+      description: "Atualiza informações de um painel, assim como seus elementos."
+      operationId: atualizarPainel
+      parameters:
+      - name: expoId
+        in: path
+        description: ID da exposição cujo painel a ser atualizado pertence
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      - name: painelId
+        in: path
+        description: ID do painel a ser atualizado
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: |-
+          Informações a atualizar no painel.
+          Caso a propriedade 'remover' de um elemento seja 'true',
+          o elemento com o id informado será removido do painel.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtualizacaoPainel'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/AtualizacaoPainel'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AtualizacaoPainel'
+        required: true
+      responses:
+        "200":
+          description: operação bem sucedida
+        "400":
+          description: dados inválidos
+        "404":
+          description: "painel, exposição ou elementos não encontrados"
+      security:
+      - api_key: []
+      - underexpo_auth:
+        - read:expo
+      x-swagger-router-controller: Exposio
+    delete:
+      tags:
+      - exposição
+      summary: Remover um painel de uma exposição
+      description: "Remove um único painel de uma exposição, somente se a exposiçã\
+        o estiver em modo rascunho"
+      operationId: excluirPainel
+      parameters:
+      - name: expoId
+        in: path
+        description: ID da exposição cujo o painel a ser removido pertence
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      - name: painelId
+        in: path
+        description: ID do painel a ser removido
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: operação bem sucedida
+        "400":
+          description: um dos ids fornecidos é inválido
+        "404":
+          description: exposição ou painel não encontrados
+        "409":
+          description: Não é permitido remover esse painel no momento
+      security:
+      - api_key: []
+      - underexpo_auth:
+        - read:expo
+        - write:expo
+      x-swagger-router-controller: Exposio
+  /user:
+    post:
+      tags:
+      - user
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: createUser
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+      x-swagger-router-controller: User
+  /user/createWithList:
+    post:
+      tags:
+      - user
+      summary: Creates list of users with given input array
+      description: Creates list of users with given input array
+      operationId: createUsersWithListInput
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          description: successful operation
+      x-swagger-router-controller: User
+  /user/login:
+    get:
+      tags:
+      - user
+      summary: Logs user into the system
+      description: ""
+      operationId: loginUser
+      parameters:
+      - name: username
+        in: query
+        description: The user name for login
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: password
+        in: query
+        description: The password for login in clear text
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              style: simple
+              explode: false
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              style: simple
+              explode: false
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/xml:
+              schema:
+                type: string
+                x-content-type: application/xml
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Invalid username/password supplied
+      x-swagger-router-controller: User
+  /user/logout:
+    get:
+      tags:
+      - user
+      summary: Logs out current logged in user session
+      description: ""
+      operationId: logoutUser
+      parameters: []
+      responses:
+        default:
+          description: successful operation
+      x-swagger-router-controller: User
+  /user/{username}:
+    get:
+      tags:
+      - user
+      summary: Get user by user name
+      description: ""
+      operationId: getUserByName
+      parameters:
+      - name: username
+        in: path
+        description: 'The name that needs to be fetched. Use user1 for testing. '
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-swagger-router-controller: User
+    put:
+      tags:
+      - user
+      summary: Update user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      parameters:
+      - name: username
+        in: path
+        description: name that need to be deleted
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Update an existent user in the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        default:
+          description: successful operation
+      x-swagger-router-controller: User
+    delete:
+      tags:
+      - user
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      parameters:
+      - name: username
+        in: path
+        description: The name that needs to be deleted
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-swagger-router-controller: User
+  /perfil/notificacao:
+    get:
+      tags:
+      - perfil
+      summary: Buscar notificações para o usuário ativo
+      description: Busca notificações de convites para participação em exposições
+      operationId: buscarNotificacoes
+      parameters:
+      - name: pagina
+        in: query
+        description: Página atual da busca
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: quantidade
+        in: query
+        description: Quantidade de registros a serem buscados
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        "200":
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notificacao'
+                x-content-type: application/json
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notificacao'
+        "204":
+          description: nenhuma notificação encontrada
+        "400":
+          description: requisição inválida
+      security:
+      - underexpo_auth:
+        - read:perfil
+      x-swagger-router-controller: Perfil
+    post:
+      tags:
+      - perfil
+      summary: Enviar uma notificação convidando um usuário para uma exposição
+      description: Envia um convite para participação em uma exposição
+      operationId: enviarNotificacao
+      requestBody:
+        description: "Dados da exposição, painel e artista que será convidado."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovaNotificacao'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/NovaNotificacao'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NovaNotificacao'
+      responses:
+        "201":
+          description: notificação criada com sucesso
+          headers:
+            location:
+              description: onde o novo recurso pode ser encontrado
+              style: simple
+              explode: false
+              schema:
+                type: string
+                example: http://localhost:8080/api/v1/perfil/notificacao/1001
+        "400":
+          description: dados inválidos
+        "404":
+          description: "exposição, painel ou artista não encontrados"
+        "409":
+          description: artista já possui convite pendente para esse painel
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - write:perfil
+      x-swagger-router-controller: Perfil
+  /perfil/notificacao/{id}:
+    get:
+      tags:
+      - perfil
+      summary: Buscar uma notificação a partir do id
+      description: Busca uma notificação de convite para participação em uma exposição
+      operationId: buscarNotificacaoPorId
+      parameters:
+      - name: id
+        in: path
+        description: id da notificação
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          default: 1001
+      responses:
+        "200":
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notificacao'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Notificacao'
+        "400":
+          description: requisição inválida
+        "404":
+          description: notificação não encontrada
+      security:
+      - underexpo_auth:
+        - read:perfil
+      x-swagger-router-controller: Perfil
+    delete:
+      tags:
+      - perfil
+      summary: Dispensar ou cancelar um convite para exposição a partir de uma notificação
+      description: Dispensa ou cancela um convite para participar em um painel de
+        uma exposição
+      operationId: dispensarConviteNotificacao
+      parameters:
+      - name: id
+        in: path
+        description: id da notificação
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          default: 1001
+      responses:
+        "200":
+          description: operação bem sucedida
+        "400":
+          description: id da notificação inválido
+        "404":
+          description: notificação não encontrada
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - write:perfil
+      x-swagger-router-controller: Perfil
+    patch:
+      tags:
+      - perfil
+      summary: Aceitar um convite para exposição a partir de uma notificação
+      description: Aceita um convite para participar em um painel de uma exposição
+      operationId: aceitarConviteNotificacao
+      parameters:
+      - name: id
+        in: path
+        description: id da notificação
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          default: 1001
+      responses:
+        "200":
+          description: operação bem sucedida
+        "400":
+          description: id da notificação inválido
+        "404":
+          description: notificação não encontrada
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - write:perfil
+      x-swagger-router-controller: Perfil
+  /perfil/acervo/obra:
+    get:
+      tags:
+      - perfil
+      summary: Listar obras no acervo do usuário
+      description: Lista as obras no acervo do usuário.
+      operationId: carregarObras
+      parameters:
+      - name: pagina
+        in: query
+        description: Página atual da busca
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: quantidade
+        in: query
+        description: Quantidade de registros a serem buscados
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - name: tipo
+        in: query
+        description: Tipo de filtro para aplicar na busca
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: todos
+          enum:
+          - todos
+          - imagem
+          - audio
+          - video
+      - name: ordenacao
+        in: query
+        description: Tipo de ordenacao para aplicar na busca
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: recentes
+          enum:
+          - recentes
+          - antigas
+          - crescente
+          - decrescente
+      responses:
+        "200":
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Obra'
+                x-content-type: application/json
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Obra'
+        "400":
+          description: dados inválidos
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - write:perfil
+      x-swagger-router-controller: Perfil
+    post:
+      tags:
+      - perfil
+      summary: Carregar obra no acervo do usuário
+      description: Adiciona uma obra ao acervo do usuário.
+      operationId: adicionarObra
+      requestBody:
+        description: Dados da obra a ser carregada no acervo.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovaObra'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/NovaObra'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NovaObra'
+      responses:
+        "201":
+          description: obra criada com sucesso
+          headers:
+            location:
+              description: onde o novo recurso pode ser encontrado
+              style: simple
+              explode: false
+              schema:
+                type: string
+                example: http://localhost:8080/api/v1/perfil/acervo/obra/1001
+        "400":
+          description: dados inválidos
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - write:perfil
+      x-swagger-router-controller: Perfil
+  /perfil/acervo/obra/{id}:
+    get:
+      tags:
+      - perfil
+      summary: Carregar obra do acervo do usuário
+      description: Carrega uma obra do acervo do usuário.
+      operationId: carregarObra
+      parameters:
+      - name: id
+        in: path
+        description: ID da obra a ser carregada
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          default: 10
+      responses:
+        "200":
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Obra'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Obra'
+        "400":
+          description: dados inválidos
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - write:perfil
+      x-swagger-router-controller: Perfil
+    put:
+      tags:
+      - perfil
+      summary: Editar obra do acervo do usuário
+      description: Edita uma obra do acervo do usuário.
+      operationId: atualizarObra
+      parameters:
+      - name: id
+        in: path
+        description: ID da obra a ser atualizada
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          default: 10
+      responses:
+        "200":
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AtualizarObra'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/AtualizarObra'
+        "400":
+          description: ID da obra inválido
+        "404":
+          description: não foi possível encontrar a obra
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - write:perfil
+      x-swagger-router-controller: Perfil
+    delete:
+      tags:
+      - perfil
+      summary: Remover uma obra do acervo do usuário
+      description: "Remove uma obra do acervo do usuário. Também remove o arquivo\
+        \ da obra do servidor, se houver."
+      operationId: removerObra
+      parameters:
+      - name: id
+        in: path
+        description: ID da obra a ser removida
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          default: 10
+      responses:
+        "200":
+          description: operação bem sucedida
+        "400":
+          description: ID da obra inválido
+        "404":
+          description: não foi possível encontrar a obra
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - write:perfil
+      x-swagger-router-controller: Perfil
+    patch:
+      tags:
+      - perfil
+      summary: Adicionar um arquivo a uma obra
+      description: Carrega um novo arquivo para uma obra
+      operationId: adicionarArquivoObra
+      parameters:
+      - name: id
+        in: path
+        description: ID da obra a qual o arquivo pertencerá
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: |-
+          Arquivo que será carregado na obra.
+          Deve ser de um formato suportado pelo tipo da obra
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+          audio/mp3:
+            schema:
+              type: string
+              format: binary
+          audio/wav:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        "200":
+          description: operacao bem sucedida
+        "400":
+          description: id fornecido é inválido
+        "404":
+          description: obra não encontrada
+        "413":
+          description: conteúdo muito grande
+        "415":
+          description: tipo de mídia não suportado
+      security:
+      - underexpo_auth:
+        - write:expo
+        - read:expo
+      x-swagger-router-controller: Perfil
+  /perfil/painel:
+    get:
+      tags:
+      - perfil
+      summary: Carregar painéis mantidos pelo usuário
+      description: Carrega os painéis de exposições que o usuário aceitou participar.
+      operationId: carregarMeusPaineis
+      responses:
+        "200":
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResumoMeuPainel'
+                x-content-type: application/json
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResumoMeuPainel'
+        "204":
+          description: nenhuma exposição para mostrar
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - read:expo
+      x-swagger-router-controller: Perfil
+  /perfil/expo:
+    get:
+      tags:
+      - perfil
+      summary: Carregar exposições organizadas pelo usuário
+      description: Carrega as exposições que o usuário organizou.
+      operationId: carregarMinhasExposicoes
+      responses:
+        "200":
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResumoExposicao'
+                x-content-type: application/json
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResumoExposicao'
+        "204":
+          description: nenhuma exposição para mostrar
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - read:expo
+      x-swagger-router-controller: Perfil
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        username:
+          type: string
+          example: theUser
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: James
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: "12345"
+        phone:
+          type: string
+          example: "12345"
+        userStatus:
+          type: integer
+          description: User Status
+          format: int32
+          example: 1
+      example:
+        firstName: John
+        lastName: James
+        password: "12345"
+        userStatus: 1
+        phone: "12345"
+        id: 10
+        email: john@email.com
+        username: theUser
+      xml:
+        name: user
+    Exposicao:
+      required:
+      - nome
+      - organizador
+      type: object
+      properties:
+        nome:
+          type: string
+          example: Exposição A
+        descricao:
+          type: string
+          example: Lorem ipsum dolor sit amet.
+        organizador:
+          type: string
+          example: artistaB
+        paineis:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/ResumoPainel'
+      example:
+        paineis:
+        - urlMiniatura: https://storage.server/img?id=hF24rGu0
+          nome: Painel A
+          id: 10
+          autor: artistaB
+        - urlMiniatura: https://storage.server/img?id=hF24rGu0
+          nome: Painel A
+          id: 10
+          autor: artistaB
+        nome: Exposição A
+        descricao: Lorem ipsum dolor sit amet.
+        organizador: artistaB
+      xml:
+        name: exposicao
+    ResumoExposicao:
+      required:
+      - nome
+      - organizador
+      - urlMiniatura
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        nome:
+          type: string
+          example: Exposição A
+        descricao:
+          type: string
+          example: Lorem ipsum dolor sit amet.
+        urlMiniatura:
+          type: string
+          example: https://storage.server/img?id=a75Bhgru9
+        organizador:
+          type: string
+          example: artistaB
+      example:
+        urlMiniatura: https://storage.server/img?id=a75Bhgru9
+        nome: Exposição A
+        id: 10
+        organizador: artistaB
+      xml:
+        name: exposicoes
+    NovaExposicao:
+      required:
+      - descricao
+      - nome
+      type: object
+      properties:
+        nome:
+          type: string
+          example: Exposição A
+        descricao:
+          type: string
+          example: Lorem ipsum dolor sit amet.
+      xml:
+        name: exposicao
+    AtualizacaoExposicao:
+      type: object
+      properties:
+        nome:
+          type: string
+          example: Exposição A
+        descricao:
+          type: string
+          example: Lorem ipsum dolor sit amet.
+        paineis:
+          type: array
+          items:
+            $ref: '#/components/schemas/AtualizacaoExposicao_paineis'
+      xml:
+        name: exposicao
+    ConviteExposicao:
+      required:
+      - nome
+      - organizador
+      - painelId
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        painelId:
+          type: integer
+          format: int64
+          example: 11
+        nome:
+          type: string
+          example: Exposição A
+        organizador:
+          type: string
+          example: artistaB
+      example:
+        painelId: 11
+        nome: Exposição A
+        id: 10
+        organizador: artistaB
+      xml:
+        name: exposicoes
+    Painel:
+      required:
+      - autor
+      - nome
+      type: object
+      properties:
+        nome:
+          type: string
+          example: Painel A
+        autor:
+          type: string
+          example: artistaB
+        elementos:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Elemento'
+      example:
+        elementos:
+        - tipo: texto
+          conteudo: Lorem ipsum dolor sit amet.
+          titulo: Título do Elemento
+          id: 10
+        - tipo: texto
+          conteudo: Lorem ipsum dolor sit amet.
+          titulo: Título do Elemento
+          id: 10
+        nome: Painel A
+        autor: artistaB
+      xml:
+        name: painel
+    ResumoPainel:
+      required:
+      - autor
+      - nome
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        nome:
+          type: string
+          example: Painel A
+        urlMiniatura:
+          type: string
+          example: https://storage.server/img?id=hF24rGu0
+        autor:
+          type: string
+          example: artistaB
+      example:
+        urlMiniatura: https://storage.server/img?id=hF24rGu0
+        nome: Painel A
+        id: 10
+        autor: artistaB
+      xml:
+        name: painel
+    ResumoMeuPainel:
+      required:
+      - autor
+      - id
+      - idExposicao
+      - nome
+      - nomeExposicao
+      - organizador
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        nome:
+          type: string
+          example: Painel A
+        urlMiniatura:
+          type: string
+          example: https://storage.server/img?id=hF24rGu0
+        autor:
+          type: string
+          example: artistaB
+        exposicao:
+          $ref: '#/components/schemas/ResumoExposicao'
+      example:
+        urlMiniatura: https://storage.server/img?id=hF24rGu0
+        nome: Painel A
+        id: 10
+        autor: artistaB
+        exposicao:
+          urlMiniatura: https://storage.server/img?id=a75Bhgru9
+          nome: Exposição A
+          id: 10
+          organizador: artistaB
+      xml:
+        name: painel
+    NovoPainel:
+      required:
+      - autor
+      type: object
+      properties:
+        autor:
+          type: string
+          example: artistaB
+      xml:
+        name: painel
+    AtualizacaoPainel:
+      required:
+      - autor
+      - nome
+      type: object
+      properties:
+        nome:
+          type: string
+          example: Painel A
+        elementos:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/AtualizacaoElemento'
+      xml:
+        name: painel
+    Elemento:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        titulo:
+          type: string
+          description: Texto opcional que ficará em destaque logo antes do conteúdo
+            do elemento
+          example: Título do Elemento
+        tipo:
+          type: string
+          description: tipo de elemento
+          enum:
+          - texto
+          - imagem
+          - audio
+          - video
+        conteudo:
+          type: string
+          description: |-
+            Dendendo do tipo do elemento pode ser texto plano, url para uma imagem,
+            url para um arquivo de áudio ou url para um vídeo.
+          example: Lorem ipsum dolor sit amet.
+      example:
+        tipo: texto
+        conteudo: Lorem ipsum dolor sit amet.
+        titulo: Título do Elemento
+        id: 10
+      xml:
+        name: elemento
+    AtualizacaoElemento:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        remover:
+          type: boolean
+          example: false
+        indice:
+          type: integer
+          description: |-
+            posição do elemento no painel. Se outro elemento já possui o mesmo índice,
+            ele irá assumir a antiga posição do elemento atualizado.
+          format: int32
+          example: 1
+        titulo:
+          type: string
+          description: Texto opcional que ficará em destaque logo antes do conteúdo
+            do elemento
+          example: Título do Elemento
+        tipo:
+          type: string
+          description: tipo de elemento
+          enum:
+          - texto
+          - obra
+        conteudo:
+          type: string
+          description: "Conteúdo de texto plano, caso o elemento seja do tipo texto."
+          example: Lorem ipsum dolor sit amet.
+        obraId:
+          type: integer
+          description: ID da obra que será apresentada no elemento
+          format: int64
+          example: 11
+      xml:
+        name: elemento
+    Notificacao:
+      required:
+      - expo
+      - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1001
+        expo:
+          $ref: '#/components/schemas/ConviteExposicao'
+      example:
+        id: 1001
+        expo:
+          painelId: 11
+          nome: Exposição A
+          id: 10
+          organizador: artistaB
+      xml:
+        name: notificacao
+    NovaNotificacao:
+      required:
+      - artista
+      - expoId
+      type: object
+      properties:
+        expoId:
+          type: integer
+          format: int64
+          example: 10
+        painelId:
+          type: integer
+          format: int64
+          example: 11
+        artista:
+          type: string
+          example: artistaC
+      xml:
+        name: notificacao
+    Obra:
+      required:
+      - dataCarregamento
+      - id
+      - nome
+      - tipo
+      - url
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        nome:
+          type: string
+          example: Imagem A
+        tipo:
+          type: string
+          description: tipo de elemento
+          enum:
+          - imagem
+          - audio
+          - video
+        dataCarregamento:
+          type: string
+          format: date
+        url:
+          type: string
+          example: https://storage.server/img?id=a7gru95Bh
+      example:
+        tipo: imagem
+        nome: Imagem A
+        id: 10
+        dataCarregamento: 2000-01-23
+        url: https://storage.server/img?id=a7gru95Bh
+      xml:
+        name: obra
+    NovaObra:
+      required:
+      - nome
+      - tipo
+      type: object
+      properties:
+        nome:
+          type: string
+          example: Imagem A
+        tipo:
+          type: string
+          description: tipo de elemento
+          enum:
+          - imagem
+          - audio
+          - video
+      xml:
+        name: obra
+    AtualizarObra:
+      type: object
+      properties:
+        nome:
+          type: string
+          example: Imagem A
+      example:
+        nome: Imagem A
+      xml:
+        name: obra
+    NovaDenuncia:
+      required:
+      - descricao
+      type: object
+      properties:
+        descricao:
+          type: string
+          example: Lorem ipsum dolor sit amet.
+      xml:
+        name: denuncia
+    AtualizacaoExposicao_paineis:
+      required:
+      - id
+      - indice
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        indice:
+          type: integer
+          format: int32
+          example: 1
+  requestBodies:
+    UserArray:
+      description: List of user object
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+  securitySchemes:
+    underexpo_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://localhost:8080/oauth/authorize
+          scopes:
+            write:expo: organizar exposições ou modificar as que tenha organizado
+            read:expo: carregar exposições
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header

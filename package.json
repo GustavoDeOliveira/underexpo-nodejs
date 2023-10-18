@@ -1,0 +1,21 @@
+{
+  "name": "swagger-underexpo-openapi-3-0",
+  "version": "0.0.1",
+  "description": "Definição OpenAPI 3.0 para a API do projeto UnderExpo.",
+  "main": "index.js",
+  "scripts": {
+    "prestart": "npm install",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "swagger"
+  ],
+  "license": "Unlicense",
+  "private": true,
+  "dependencies": {
+    "connect": "^3.2.0",
+    "cors": "^2.8.5",
+    "js-yaml": "^3.3.0",
+    "oas3-tools": "^2.2.3"
+  }
+}
