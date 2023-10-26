@@ -32,6 +32,34 @@ exports.adicionarArquivoObra = function(body,id) {
 
 
 /**
+ * Enviar uma notificação convidando um usuário para uma exposição
+ * Envia um convite para participação em uma exposição
+ *
+ * body NovaNotificacao Dados da exposição, painel e artista que será convidado. (optional)
+ * no response value expected for this operation
+ **/
+exports.adicionarContato = function(body) {
+  return new Promise(function(resolve, reject) {
+    resolve();
+  });
+}
+
+
+/**
+ * Enviar uma notificação convidando um usuário para uma exposição
+ * Envia um convite para participação em uma exposição
+ *
+ * body NovaNotificacao Dados da exposição, painel e artista que será convidado. (optional)
+ * no response value expected for this operation
+ **/
+exports.adicionarContato = function(body) {
+  return new Promise(function(resolve, reject) {
+    resolve();
+  });
+}
+
+
+/**
  * Carregar obra no acervo do usuário
  * Adiciona uma obra ao acervo do usuário.
  *
@@ -53,6 +81,20 @@ exports.adicionarObra = function(body) {
  * no response value expected for this operation
  **/
 exports.adicionarObra = function(body) {
+  return new Promise(function(resolve, reject) {
+    resolve();
+  });
+}
+
+
+/**
+ * Atualizar canal de contato
+ * Atualiza um canal de contato
+ *
+ * id Long id do contato
+ * no response value expected for this operation
+ **/
+exports.atualizarContato = function(id) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -72,6 +114,71 @@ exports.atualizarObra = function(id) {
     examples['application/json'] = {
   "nome" : "Imagem A"
 };
+    if (Object.keys(examples).length > 0) {
+      resolve(examples[Object.keys(examples)[0]]);
+    } else {
+      resolve();
+    }
+  });
+}
+
+
+/**
+ * Buscar uma notificação a partir do id
+ * Busca uma notificação de convite para participação em uma exposição
+ *
+ * id Long id da notificação
+ * returns Notificacao
+ **/
+exports.buscarContatoPorId = function(id) {
+  return new Promise(function(resolve, reject) {
+    var examples = {};
+    examples['application/json'] = {
+  "id" : 1001,
+  "expo" : {
+    "painelId" : 11,
+    "nome" : "Exposição A",
+    "id" : 10,
+    "organizador" : "artistaB"
+  }
+};
+    if (Object.keys(examples).length > 0) {
+      resolve(examples[Object.keys(examples)[0]]);
+    } else {
+      resolve();
+    }
+  });
+}
+
+
+/**
+ * Buscar notificações para o usuário ativo
+ * Busca notificações de convites para participação em exposições
+ *
+ * pagina Integer Página atual da busca
+ * quantidade Integer Quantidade de registros a serem buscados
+ * returns List
+ **/
+exports.buscarContatos = function(pagina,quantidade) {
+  return new Promise(function(resolve, reject) {
+    var examples = {};
+    examples['application/json'] = [ {
+  "id" : 1001,
+  "expo" : {
+    "painelId" : 11,
+    "nome" : "Exposição A",
+    "id" : 10,
+    "organizador" : "artistaB"
+  }
+}, {
+  "id" : 1001,
+  "expo" : {
+    "painelId" : 11,
+    "nome" : "Exposição A",
+    "id" : 10,
+    "organizador" : "artistaB"
+  }
+} ];
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -197,15 +304,17 @@ exports.carregarMinhasExposicoes = function() {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
-  "urlMiniatura" : "https://storage.server/img?id=a75Bhgru9",
-  "nome" : "Exposição A",
-  "id" : 10,
-  "organizador" : "artistaB"
+  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
+  "nome" : "Exposição C",
+  "descricao": "Lorem ipsum sit dolor amet.",
+  "id" : 12,
+  "organizador" : "euMesmo"
 }, {
-  "urlMiniatura" : "https://storage.server/img?id=a75Bhgru9",
-  "nome" : "Exposição A",
-  "id" : 10,
-  "organizador" : "artistaB"
+  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
+  "nome" : "Exposição D",
+  "descricao": "Lorem ipsum sit dolor amet. Nam vel ex non orci placerat efficitur et quis magna. Nam quis viverra eros. Fusce ut suscipit massa. Duis bibendum, ligula in commodo lobortis, nibh augue iaculis ipsum, eu pulvinar erat nibh ac neque. Vestibulum ac eleifend augue. Cras in elementum odio.",
+  "id" : 13,
+  "organizador" : "euMesmo"
 } ];
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -278,20 +387,6 @@ exports.carregarObras = function(pagina,quantidade,tipo,ordenacao) {
 
 
 /**
- * Dispensar ou cancelar um convite para exposição a partir de uma notificação
- * Dispensa ou cancela um convite para participar em um painel de uma exposição
- *
- * id Long id da notificação
- * no response value expected for this operation
- **/
-exports.dispensarConviteNotificacao = function(id) {
-  return new Promise(function(resolve, reject) {
-    resolve();
-  });
-}
-
-
-/**
  * Enviar uma notificação convidando um usuário para uma exposição
  * Envia um convite para participação em uma exposição
  *
@@ -313,6 +408,34 @@ exports.enviarNotificacao = function(body) {
  * no response value expected for this operation
  **/
 exports.enviarNotificacao = function(body) {
+  return new Promise(function(resolve, reject) {
+    resolve();
+  });
+}
+
+
+/**
+ * Remover um canal de contato
+ * Remove um canal de contato do perfil atualmente 
+ *
+ * id Long id do contato
+ * no response value expected for this operation
+ **/
+exports.removerConato = function(id) {
+  return new Promise(function(resolve, reject) {
+    resolve();
+  });
+}
+
+
+/**
+ * Remover canal de contato
+ * Remove um canal de contato
+ *
+ * id Long id do contato
+ * no response value expected for this operation
+ **/
+exports.removerContato = function(id) {
   return new Promise(function(resolve, reject) {
     resolve();
   });

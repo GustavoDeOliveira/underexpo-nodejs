@@ -168,10 +168,32 @@ exports.carregarPainelPorId = function(expoId,painelId) {
         "titulo" : "Título do Elemento",
         "id" : 100
       }, {
+        "tipo" : "audio",
+        "conteudo" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
+        "titulo" : "Elemento de Áudio",
+        "id" : 101
+      }, {
         "tipo" : "texto",
         "conteudo" : "Lorem ipsum dolor sit amet.",
-        "id" : 101
-      } ],
+        "id" : 102
+      }, {
+        "tipo" : "audio",
+        "conteudo" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
+        "titulo" : "Elementos de Áudio",
+        "id" : 103
+      }, {
+        "tipo" : "audio",
+        "conteudo" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
+        "id" : 104
+      }, {
+        "tipo" : "audio",
+        "conteudo" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
+        "id" : 105
+      }, {
+        "tipo" : "audio",
+        "conteudo" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
+        "id" : 106
+      }, ],
       "nome" : "Painel A",
       "autor" : "artistaB"
     };

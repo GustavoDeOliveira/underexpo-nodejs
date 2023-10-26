@@ -23,6 +23,26 @@ module.exports.adicionarArquivoObra = function adicionarArquivoObra (req, res, n
     });
 };
 
+module.exports.adicionarContato = function adicionarContato (req, res, next, body) {
+  Perfil.adicionarContato(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
+};
+
+module.exports.adicionarContato = function adicionarContato (req, res, next, body) {
+  Perfil.adicionarContato(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
+};
+
 module.exports.adicionarObra = function adicionarObra (req, res, next, body) {
   Perfil.adicionarObra(body)
     .then(function (response) {
@@ -35,6 +55,16 @@ module.exports.adicionarObra = function adicionarObra (req, res, next, body) {
 
 module.exports.adicionarObra = function adicionarObra (req, res, next, body) {
   Perfil.adicionarObra(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
+};
+
+module.exports.atualizarContato = function atualizarContato (req, res, next, id) {
+  Perfil.atualizarContato(id)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -45,6 +75,26 @@ module.exports.adicionarObra = function adicionarObra (req, res, next, body) {
 
 module.exports.atualizarObra = function atualizarObra (req, res, next, id) {
   Perfil.atualizarObra(id)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
+};
+
+module.exports.buscarContatoPorId = function buscarContatoPorId (req, res, next, id) {
+  Perfil.buscarContatoPorId(id)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
+};
+
+module.exports.buscarContatos = function buscarContatos (req, res, next, pagina, quantidade) {
+  Perfil.buscarContatos(pagina, quantidade)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -113,16 +163,6 @@ module.exports.carregarObras = function carregarObras (req, res, next, pagina, q
     });
 };
 
-module.exports.dispensarConviteNotificacao = function dispensarConviteNotificacao (req, res, next, id) {
-  Perfil.dispensarConviteNotificacao(id)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
-
 module.exports.enviarNotificacao = function enviarNotificacao (req, res, next, body) {
   Perfil.enviarNotificacao(body)
     .then(function (response) {
@@ -135,6 +175,26 @@ module.exports.enviarNotificacao = function enviarNotificacao (req, res, next, b
 
 module.exports.enviarNotificacao = function enviarNotificacao (req, res, next, body) {
   Perfil.enviarNotificacao(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
+};
+
+module.exports.removerConato = function removerConato (req, res, next, id) {
+  Perfil.removerConato(id)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
+};
+
+module.exports.removerContato = function removerContato (req, res, next, id) {
+  Perfil.removerContato(id)
     .then(function (response) {
       utils.writeJson(res, response);
     })

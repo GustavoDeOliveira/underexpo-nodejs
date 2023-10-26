@@ -12,7 +12,7 @@ info:
 servers:
 - url: http://localhost:8080/api/v1
 tags:
-- name: exposição
+- name: exposicao
   description: Informações e operações relacionadas às exposições
 - name: perfil
   description: Informações e operações relacionadas aos perfis de usuários
@@ -20,7 +20,7 @@ paths:
   /expo:
     get:
       tags:
-      - exposição
+      - exposicao
       summary: Buscar exposições publicadas com paginação
       description: "Busca exposições que tenham sido disponibilizadas ao público,\
         \ permitindo paginação."
@@ -66,10 +66,10 @@ paths:
       security:
       - underexpo_auth:
         - read:expo
-      x-swagger-router-controller: Exposio
+      x-swagger-router-controller: Exposicao
     post:
       tags:
-      - exposição
+      - exposicao
       summary: Organizar uma nova exposição
       description: Adiciona uma nova exposição em modo rascunho
       operationId: organizarExposicao
@@ -103,11 +103,11 @@ paths:
       - underexpo_auth:
         - write:expo
         - read:expo
-      x-swagger-router-controller: Exposio
+      x-swagger-router-controller: Exposicao
   /expo/{expoId}:
     get:
       tags:
-      - exposição
+      - exposicao
       summary: Carregar uma exposição a partir do seu ID
       description: "Retorna uma única exposição, com uma lista de painéis."
       operationId: carregarExposicaoPorId
@@ -139,10 +139,10 @@ paths:
       - api_key: []
       - underexpo_auth:
         - read:expo
-      x-swagger-router-controller: Exposio
+      x-swagger-router-controller: Exposicao
     put:
       tags:
-      - exposição
+      - exposicao
       summary: Alterar informações em uma exposição
       description: |-
         Atualiza as informações de uma exposição.
@@ -183,10 +183,10 @@ paths:
       - underexpo_auth:
         - write:expo
         - read:expo
-      x-swagger-router-controller: Exposio
+      x-swagger-router-controller: Exposicao
     delete:
       tags:
-      - exposição
+      - exposicao
       summary: Remover uma exposição
       description: |-
         Remove uma exposição e seus painéis.
@@ -215,11 +215,11 @@ paths:
       - underexpo_auth:
         - write:expo
         - read:expo
-      x-swagger-router-controller: Exposio
+      x-swagger-router-controller: Exposicao
   /expo/{expoId}/denuncia:
     post:
       tags:
-      - exposição
+      - exposicao
       summary: Denunciar uma exposição a partir do seu ID
       description: Cria uma denúncia associada a exposição com o ID informado
       operationId: denunciarExposicao
@@ -257,11 +257,11 @@ paths:
       - api_key: []
       - underexpo_auth:
         - read:expo
-      x-swagger-router-controller: Exposio
+      x-swagger-router-controller: Exposicao
   /expo/{expoId}/miniatura:
     put:
       tags:
-      - exposição
+      - exposicao
       summary: Adicionar uma imagem de miniatura a uma exposição
       description: Carrega uma nova imagem como miniatura para a exposição
       operationId: adicionarMiniaturaExposicao
@@ -302,10 +302,10 @@ paths:
       - underexpo_auth:
         - write:expo
         - read:expo
-      x-swagger-router-controller: Exposio
+      x-swagger-router-controller: Exposicao
     delete:
       tags:
-      - exposição
+      - exposicao
       summary: Remover a imagem de miniatura de uma exposição
       description: "Remove a imagem de miniatura da exposição, caso possua"
       operationId: removerMiniaturaExposicao
@@ -330,11 +330,11 @@ paths:
       - underexpo_auth:
         - write:expo
         - read:expo
-      x-swagger-router-controller: Exposio
+      x-swagger-router-controller: Exposicao
   /expo/{expoId}/painel:
     post:
       tags:
-      - exposição
+      - exposicao
       summary: Criar um painel em uma exposição
       description: "Cria um painel, e envia um convite para o artista informado."
       operationId: CriarPainel
@@ -381,11 +381,11 @@ paths:
       - underexpo_auth:
         - read:expo
         - write:expo
-      x-swagger-router-controller: Exposio
+      x-swagger-router-controller: Exposicao
   /expo/{expoId}/painel/{painelId}:
     get:
       tags:
-      - exposição
+      - exposicao
       summary: Carregar um painel de uma exposição a partir de seus IDs
       description: "Retorna um único painel, com uma lista de seus elementos."
       operationId: carregarPainelPorId
@@ -426,10 +426,10 @@ paths:
       - api_key: []
       - underexpo_auth:
         - read:expo
-      x-swagger-router-controller: Exposio
+      x-swagger-router-controller: Exposicao
     put:
       tags:
-      - exposição
+      - exposicao
       summary: Alterar informações de um painel
       description: "Atualiza informações de um painel, assim como seus elementos."
       operationId: atualizarPainel
@@ -479,10 +479,10 @@ paths:
       - api_key: []
       - underexpo_auth:
         - read:expo
-      x-swagger-router-controller: Exposio
+      x-swagger-router-controller: Exposicao
     delete:
       tags:
-      - exposição
+      - exposicao
       summary: Remover um painel de uma exposição
       description: "Remove um único painel de uma exposição, somente se a exposiçã\
         o estiver em modo rascunho"
@@ -520,7 +520,7 @@ paths:
       - underexpo_auth:
         - read:expo
         - write:expo
-      x-swagger-router-controller: Exposio
+      x-swagger-router-controller: Exposicao
   /user:
     post:
       tags:
@@ -856,14 +856,13 @@ paths:
     delete:
       tags:
       - perfil
-      summary: Dispensar ou cancelar um convite para exposição a partir de uma notificação
-      description: Dispensa ou cancela um convite para participar em um painel de
-        uma exposição
-      operationId: dispensarConviteNotificacao
+      summary: Remover um canal de contato
+      description: 'Remove um canal de contato do perfil atualmente '
+      operationId: removerConato
       parameters:
       - name: id
         in: path
-        description: id da notificação
+        description: id do contato
         required: true
         style: simple
         explode: false
@@ -875,9 +874,9 @@ paths:
         "200":
           description: operação bem sucedida
         "400":
-          description: id da notificação inválido
+          description: id do contato inválido
         "404":
-          description: notificação não encontrada
+          description: contato não encontrado
       security:
       - underexpo_auth:
         - read:perfil
@@ -907,6 +906,191 @@ paths:
           description: id da notificação inválido
         "404":
           description: notificação não encontrada
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - write:perfil
+      x-swagger-router-controller: Perfil
+  /perfil/contato:
+    get:
+      tags:
+      - perfil
+      summary: Buscar notificações para o usuário ativo
+      description: Busca notificações de convites para participação em exposições
+      operationId: buscarContatos
+      parameters:
+      - name: pagina
+        in: query
+        description: Página atual da busca
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: quantidade
+        in: query
+        description: Quantidade de registros a serem buscados
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        "200":
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notificacao'
+                x-content-type: application/json
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notificacao'
+        "204":
+          description: nenhuma notificação encontrada
+        "400":
+          description: requisição inválida
+      security:
+      - underexpo_auth:
+        - read:perfil
+      x-swagger-router-controller: Perfil
+    post:
+      tags:
+      - perfil
+      summary: Enviar uma notificação convidando um usuário para uma exposição
+      description: Envia um convite para participação em uma exposição
+      operationId: adicionarContato
+      requestBody:
+        description: "Dados da exposição, painel e artista que será convidado."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovaNotificacao'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/NovaNotificacao'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NovaNotificacao'
+      responses:
+        "201":
+          description: notificação criada com sucesso
+          headers:
+            location:
+              description: onde o novo recurso pode ser encontrado
+              style: simple
+              explode: false
+              schema:
+                type: string
+                example: http://localhost:8080/api/v1/perfil/notificacao/1001
+        "400":
+          description: dados inválidos
+        "404":
+          description: "exposição, painel ou artista não encontrados"
+        "409":
+          description: artista já possui convite pendente para esse painel
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - write:perfil
+      x-swagger-router-controller: Perfil
+  /perfil/contato/{id}:
+    get:
+      tags:
+      - perfil
+      summary: Buscar uma notificação a partir do id
+      description: Busca uma notificação de convite para participação em uma exposição
+      operationId: buscarContatoPorId
+      parameters:
+      - name: id
+        in: path
+        description: id da notificação
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          default: 1001
+      responses:
+        "200":
+          description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notificacao'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Notificacao'
+        "400":
+          description: requisição inválida
+        "404":
+          description: notificação não encontrada
+      security:
+      - underexpo_auth:
+        - read:perfil
+      x-swagger-router-controller: Perfil
+    put:
+      tags:
+      - perfil
+      summary: Atualizar canal de contato
+      description: Atualiza um canal de contato
+      operationId: atualizarContato
+      parameters:
+      - name: id
+        in: path
+        description: id do contato
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          default: 1001
+      responses:
+        "200":
+          description: operação bem sucedida
+        "400":
+          description: id do contato inválido
+        "404":
+          description: contato não encontrado
+      security:
+      - underexpo_auth:
+        - read:perfil
+        - write:perfil
+      x-swagger-router-controller: Perfil
+    delete:
+      tags:
+      - perfil
+      summary: Remover canal de contato
+      description: Remove um canal de contato
+      operationId: removerContato
+      parameters:
+      - name: id
+        in: path
+        description: id do contato
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          default: 1001
+      responses:
+        "200":
+          description: operação bem sucedida
+        "400":
+          description: id do contato inválido
+        "404":
+          description: contato não encontrado
       security:
       - underexpo_auth:
         - read:perfil
@@ -1334,7 +1518,7 @@ components:
           example: Exposição A
         descricao:
           type: string
-          example: Lorem ipsum dolor sit amet.
+          example: lorem ipsum
         urlMiniatura:
           type: string
           example: https://storage.server/img?id=a75Bhgru9
@@ -1345,6 +1529,7 @@ components:
         urlMiniatura: https://storage.server/img?id=a75Bhgru9
         nome: Exposição A
         id: 10
+        descricao: lorem ipsum
         organizador: artistaB
       xml:
         name: exposicoes
@@ -1497,6 +1682,7 @@ components:
           urlMiniatura: https://storage.server/img?id=a75Bhgru9
           nome: Exposição A
           id: 10
+          descricao: lorem ipsum
           organizador: artistaB
       xml:
         name: painel
