@@ -105,6 +105,18 @@ exports.buscarExposicoesPublicadas = function(pagina,quantidade) {
   "descricao": "Lorem ipsum sit dolor amet. Nam vel ex non orci placerat efficitur et quis magna. Nam quis viverra eros. Fusce ut suscipit massa. Duis bibendum, ligula in commodo lobortis, nibh augue iaculis ipsum, eu pulvinar erat nibh ac neque. Vestibulum ac eleifend augue. Cras in elementum odio.",
   "id" : 11,
   "organizador" : "artistaA"
+}, {
+  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
+  "nome" : "Exposição C",
+  "descricao": "Lorem ipsum sit dolor amet.",
+  "id" : 12,
+  "organizador" : "euMesmo"
+}, {
+  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
+  "nome" : "Exposição D",
+  "descricao": "Lorem ipsum sit dolor amet. Nam vel ex non orci placerat efficitur et quis magna. Nam quis viverra eros. Fusce ut suscipit massa. Duis bibendum, ligula in commodo lobortis, nibh augue iaculis ipsum, eu pulvinar erat nibh ac neque. Vestibulum ac eleifend augue. Cras in elementum odio.",
+  "id" : 13,
+  "organizador" : "euMesmo"
 } ];
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -126,6 +138,15 @@ exports.carregarExposicaoPorId = function(expoId) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = {
+  "convites" : [ {
+    "artista" : "artistaA",
+    "expoId" : 10,
+    "id" : 1001
+  }, {
+    "artista" : "artistaB",
+    "expoId" : 10,
+    "id" : 1002
+  } ],
   "paineis" : [ {
     "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
     "nome" : "Painel A",
@@ -304,25 +325,19 @@ exports.excluirPainel = function(expoId,painelId) {
  * Adiciona uma nova exposição em modo rascunho
  *
  * body NovaExposicao Create a new pet in the store
- * no response value expected for this operation
+ * returns inline_response_201
  **/
 exports.organizarExposicao = function(body) {
   return new Promise(function(resolve, reject) {
-    resolve();
-  });
-}
-
-
-/**
- * Organizar uma nova exposição
- * Adiciona uma nova exposição em modo rascunho
- *
- * body NovaExposicao Create a new pet in the store
- * no response value expected for this operation
- **/
-exports.organizarExposicao = function(body) {
-  return new Promise(function(resolve, reject) {
-    resolve();
+    var examples = {};
+    examples['application/json'] = {
+  "id" : 13
+};
+    if (Object.keys(examples).length > 0) {
+      resolve(examples[Object.keys(examples)[0]]);
+    } else {
+      resolve();
+    }
   });
 }
 
