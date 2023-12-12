@@ -123,6 +123,16 @@ module.exports.buscarNotificacoes = function buscarNotificacoes (req, res, next,
     });
 };
 
+module.exports.buscarPerfis = function buscarPerfis (req, res, next, chave) {
+  Perfil.buscarPerfis(chave)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
+};
+
 module.exports.carregarMeusPaineis = function carregarMeusPaineis (req, res, next) {
   Perfil.carregarMeusPaineis()
     .then(function (response) {
@@ -183,8 +193,8 @@ module.exports.enviarNotificacao = function enviarNotificacao (req, res, next, b
     });
 };
 
-module.exports.removerConato = function removerConato (req, res, next, id) {
-  Perfil.removerConato(id)
+module.exports.removerContato = function removerContato (req, res, next, id) {
+  Perfil.removerContato(id)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -193,8 +203,8 @@ module.exports.removerConato = function removerConato (req, res, next, id) {
     });
 };
 
-module.exports.removerContato = function removerContato (req, res, next, id) {
-  Perfil.removerContato(id)
+module.exports.removerNotificacao = function removerNotificacao (req, res, next, id) {
+  Perfil.removerNotificacao(id)
     .then(function (response) {
       utils.writeJson(res, response);
     })

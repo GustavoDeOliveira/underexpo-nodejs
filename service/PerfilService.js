@@ -32,10 +32,10 @@ exports.adicionarArquivoObra = function(body,id) {
 
 
 /**
- * Enviar uma notificação convidando um usuário para uma exposição
- * Envia um convite para participação em uma exposição
+ * Adicionar canal de contato ao perfil do usuario
+ * Adiciona um canal de contato ao perfil da conta da sessão atual
  *
- * body NovaNotificacao Dados da exposição, painel e artista que será convidado. (optional)
+ * body NovaNotificacao Dados de contato a serem cadastrados. (optional)
  * no response value expected for this operation
  **/
 exports.adicionarContato = function(body) {
@@ -46,10 +46,10 @@ exports.adicionarContato = function(body) {
 
 
 /**
- * Enviar uma notificação convidando um usuário para uma exposição
- * Envia um convite para participação em uma exposição
+ * Adicionar canal de contato ao perfil do usuario
+ * Adiciona um canal de contato ao perfil da conta da sessão atual
  *
- * body NovaNotificacao Dados da exposição, painel e artista que será convidado. (optional)
+ * body NovaNotificacao Dados de contato a serem cadastrados. (optional)
  * no response value expected for this operation
  **/
 exports.adicionarContato = function(body) {
@@ -124,8 +124,8 @@ exports.atualizarObra = function(id) {
 
 
 /**
- * Buscar uma notificação a partir do id
- * Busca uma notificação de convite para participação em uma exposição
+ * Buscar um canal de contato a partir do id
+ * Busca um canal de contato de um artista
  *
  * id Long id da notificação
  * returns Notificacao
@@ -152,8 +152,8 @@ exports.buscarContatoPorId = function(id) {
 
 
 /**
- * Buscar notificações para o usuário ativo
- * Busca notificações de convites para participação em exposições
+ * Buscar canais de contato de um usuário
+ * Busca os canais de contato de um usuario a partir do seu nome
  *
  * pagina Integer Página atual da busca
  * quantidade Integer Quantidade de registros a serem buscados
@@ -254,6 +254,30 @@ exports.buscarNotificacoes = function(pagina,quantidade) {
 
 
 /**
+ * Buscar perfis cadastrados na plataforma a partir de uma palavra-chave
+ * Busca perfis de usuários cadastrados na plataforma que coincidam com a palavra-chave informada.
+ *
+ * chave String A palavra-chave para filtrar os resultados da busca
+ * returns List
+ **/
+exports.buscarPerfis = function(chave) {
+  return new Promise(function(resolve, reject) {
+    var examples = {};
+    examples['application/json'] = [ {
+  "nome" : "artistaA"
+}, {
+  "nome" : "artistaA"
+} ];
+    if (Object.keys(examples).length > 0) {
+      resolve(examples[Object.keys(examples)[0]]);
+    } else {
+      resolve();
+    }
+  });
+}
+
+
+/**
  * Carregar painéis mantidos pelo usuário
  * Carrega os painéis de exposições que o usuário aceitou participar.
  *
@@ -263,25 +287,27 @@ exports.carregarMeusPaineis = function() {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
-  "urlMiniatura" : "https://storage.server/img?id=hF24rGu0",
+  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
   "nome" : "Painel A",
   "id" : 10,
   "autor" : "artistaB",
   "exposicao" : {
-    "urlMiniatura" : "https://storage.server/img?id=a75Bhgru9",
+    "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
     "nome" : "Exposição A",
     "id" : 10,
+    "descricao" : "lorem ipsum",
     "organizador" : "artistaB"
   }
 }, {
-  "urlMiniatura" : "https://storage.server/img?id=hF24rGu0",
+  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
   "nome" : "Painel A",
   "id" : 10,
   "autor" : "artistaB",
   "exposicao" : {
-    "urlMiniatura" : "https://storage.server/img?id=a75Bhgru9",
+    "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
     "nome" : "Exposição A",
     "id" : 10,
+    "descricao" : "lorem ipsum",
     "organizador" : "artistaB"
   }
 } ];
@@ -340,7 +366,7 @@ exports.carregarObra = function(id) {
   "nome" : "Imagem A",
   "id" : 10,
   "dataCarregamento" : "2000-01-23",
-  "url" : "https://storage.server/img?id=a7gru95Bh"
+  "url" : "https://source.unsplash.com/random?wallpapers"
 };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -369,13 +395,13 @@ exports.carregarObras = function(pagina,quantidade,tipo,ordenacao) {
   "nome" : "Imagem A",
   "id" : 10,
   "dataCarregamento" : "2000-01-23",
-  "url" : "https://storage.server/img?id=a7gru95Bh"
+  "url" : "https://source.unsplash.com/random?wallpapers"
 }, {
   "tipo" : "imagem",
   "nome" : "Imagem A",
   "id" : 10,
   "dataCarregamento" : "2000-01-23",
-  "url" : "https://storage.server/img?id=a7gru95Bh"
+  "url" : "https://source.unsplash.com/random?wallpapers"
 } ];
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -391,11 +417,21 @@ exports.carregarObras = function(pagina,quantidade,tipo,ordenacao) {
  * Envia um convite para participação em uma exposição
  *
  * body NovaNotificacao Dados da exposição, painel e artista que será convidado. (optional)
- * no response value expected for this operation
+ * returns ConviteExposicao
  **/
 exports.enviarNotificacao = function(body) {
   return new Promise(function(resolve, reject) {
-    resolve();
+    var examples = {};
+    examples['application/json'] = {
+  "artista" : "artistaA",
+  "expoId" : 10,
+  "id" : 1001
+};
+    if (Object.keys(examples).length > 0) {
+      resolve(examples[Object.keys(examples)[0]]);
+    } else {
+      resolve();
+    }
   });
 }
 
@@ -405,25 +441,21 @@ exports.enviarNotificacao = function(body) {
  * Envia um convite para participação em uma exposição
  *
  * body NovaNotificacao Dados da exposição, painel e artista que será convidado. (optional)
- * no response value expected for this operation
+ * returns ConviteExposicao
  **/
 exports.enviarNotificacao = function(body) {
   return new Promise(function(resolve, reject) {
-    resolve();
-  });
-}
-
-
-/**
- * Remover um canal de contato
- * Remove um canal de contato do perfil atualmente 
- *
- * id Long id do contato
- * no response value expected for this operation
- **/
-exports.removerConato = function(id) {
-  return new Promise(function(resolve, reject) {
-    resolve();
+    var examples = {};
+    examples['application/json'] = {
+  "artista" : "artistaA",
+  "expoId" : 10,
+  "id" : 1001
+};
+    if (Object.keys(examples).length > 0) {
+      resolve(examples[Object.keys(examples)[0]]);
+    } else {
+      resolve();
+    }
   });
 }
 
@@ -436,6 +468,20 @@ exports.removerConato = function(id) {
  * no response value expected for this operation
  **/
 exports.removerContato = function(id) {
+  return new Promise(function(resolve, reject) {
+    resolve();
+  });
+}
+
+
+/**
+ * Cancelar convite para exposição
+ * Cancela um convite para uma exposição
+ *
+ * id Long id do contato
+ * no response value expected for this operation
+ **/
+exports.removerNotificacao = function(id) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
