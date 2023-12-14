@@ -35,12 +35,20 @@ exports.adicionarArquivoObra = function(body,id) {
  * Adicionar canal de contato ao perfil do usuario
  * Adiciona um canal de contato ao perfil da conta da sessão atual
  *
- * body NovaNotificacao Dados de contato a serem cadastrados. (optional)
- * no response value expected for this operation
+ * body NovoContato Dados de contato a serem cadastrados. (optional)
+ * returns inline_response_201_1
  **/
 exports.adicionarContato = function(body) {
   return new Promise(function(resolve, reject) {
-    resolve();
+    var examples = {};
+    examples['application/json'] = {
+  "id" : 10001
+};
+    if (Object.keys(examples).length > 0) {
+      resolve(examples[Object.keys(examples)[0]]);
+    } else {
+      resolve();
+    }
   });
 }
 
@@ -49,12 +57,20 @@ exports.adicionarContato = function(body) {
  * Adicionar canal de contato ao perfil do usuario
  * Adiciona um canal de contato ao perfil da conta da sessão atual
  *
- * body NovaNotificacao Dados de contato a serem cadastrados. (optional)
- * no response value expected for this operation
+ * body NovoContato Dados de contato a serem cadastrados. (optional)
+ * returns inline_response_201_1
  **/
 exports.adicionarContato = function(body) {
   return new Promise(function(resolve, reject) {
-    resolve();
+    var examples = {};
+    examples['application/json'] = {
+  "id" : 10001
+};
+    if (Object.keys(examples).length > 0) {
+      resolve(examples[Object.keys(examples)[0]]);
+    } else {
+      resolve();
+    }
   });
 }
 
@@ -91,10 +107,11 @@ exports.adicionarObra = function(body) {
  * Atualizar canal de contato
  * Atualiza um canal de contato
  *
+ * body AtualizarContato Dados para atualização do canal de contato (optional)
  * id Long id do contato
  * no response value expected for this operation
  **/
-exports.atualizarContato = function(id) {
+exports.atualizarContato = function(body,id) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -128,19 +145,16 @@ exports.atualizarObra = function(id) {
  * Busca um canal de contato de um artista
  *
  * id Long id da notificação
- * returns Notificacao
+ * returns Contato
  **/
 exports.buscarContatoPorId = function(id) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = {
-  "id" : 1001,
-  "expo" : {
-    "painelId" : 11,
-    "nome" : "Exposição A",
-    "id" : 10,
-    "organizador" : "artistaB"
-  }
+  "link" : "http://www.instagram.com/meu.instagram",
+  "nome" : "@meu.instagram",
+  "id" : 10001,
+  "canal" : "Instagram"
 };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -163,21 +177,15 @@ exports.buscarContatos = function(pagina,quantidade) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
-  "id" : 1001,
-  "expo" : {
-    "painelId" : 11,
-    "nome" : "Exposição A",
-    "id" : 10,
-    "organizador" : "artistaB"
-  }
+  "link" : "http://www.instagram.com/meu.instagram",
+  "nome" : "@meu.instagram",
+  "id" : 10001,
+  "canal" : "Instagram"
 }, {
-  "id" : 1001,
-  "expo" : {
-    "painelId" : 11,
-    "nome" : "Exposição A",
-    "id" : 10,
-    "organizador" : "artistaB"
-  }
+  "link" : "http://www.instagram.com/meu.instagram",
+  "nome" : "@meu.instagram",
+  "id" : 10001,
+  "canal" : "Instagram"
 } ];
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -266,7 +274,7 @@ exports.buscarPerfis = function(chave) {
     examples['application/json'] = [ {
   "nome" : "artistaA"
 }, {
-  "nome" : "artistaA"
+  "nome" : "artistaB"
 } ];
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -478,7 +486,7 @@ exports.removerContato = function(id) {
  * Cancelar convite para exposição
  * Cancela um convite para uma exposição
  *
- * id Long id do contato
+ * id Long id do convite
  * no response value expected for this operation
  **/
 exports.removerNotificacao = function(id) {

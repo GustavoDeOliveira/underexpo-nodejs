@@ -63,8 +63,8 @@ module.exports.adicionarObra = function adicionarObra (req, res, next, body) {
     });
 };
 
-module.exports.atualizarContato = function atualizarContato (req, res, next, id) {
-  Perfil.atualizarContato(id)
+module.exports.atualizarContato = function atualizarContato (req, res, next, body, id) {
+  Perfil.atualizarContato(body, id)
     .then(function (response) {
       utils.writeJson(res, response);
     })

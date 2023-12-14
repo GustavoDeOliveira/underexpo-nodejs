@@ -74,7 +74,7 @@ paths:
       description: Adiciona uma nova exposição em modo rascunho
       operationId: organizarExposicao
       requestBody:
-        description: Create a new pet in the store
+        description: Dados da nova exposição
         content:
           application/json:
             schema:
@@ -905,7 +905,7 @@ paths:
       parameters:
       - name: id
         in: path
-        description: id do contato
+        description: id do convite
         required: true
         style: simple
         explode: false
@@ -917,9 +917,9 @@ paths:
         "200":
           description: operação bem sucedida
         "400":
-          description: id do contato inválido
+          description: id do convite inválido
         "404":
-          description: contato não encontrado
+          description: convite não encontrado
       security:
       - underexpo_auth:
         - read:perfil
@@ -990,13 +990,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Notificacao'
+                  $ref: '#/components/schemas/Contato'
                 x-content-type: application/json
             application/xml:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Notificacao'
+                  $ref: '#/components/schemas/Contato'
         "204":
           description: nenhuma notificação encontrada
         "400":
@@ -1016,24 +1016,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NovaNotificacao'
+              $ref: '#/components/schemas/NovoContato'
           application/xml:
             schema:
-              $ref: '#/components/schemas/NovaNotificacao'
+              $ref: '#/components/schemas/NovoContato'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/NovaNotificacao'
+              $ref: '#/components/schemas/NovoContato'
       responses:
         "201":
-          description: notificação criada com sucesso
-          headers:
-            location:
-              description: onde o novo recurso pode ser encontrado
-              style: simple
-              explode: false
+          description: contato criado com sucesso
+          content:
+            application/json:
               schema:
-                type: string
-                example: http://localhost:8080/api/v1/perfil/notificacao/1001
+                $ref: '#/components/schemas/inline_response_201_1'
         "400":
           description: dados inválidos
         "404":
@@ -1069,10 +1065,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Notificacao'
+                $ref: '#/components/schemas/Contato'
             application/xml:
               schema:
-                $ref: '#/components/schemas/Notificacao'
+                $ref: '#/components/schemas/Contato'
         "400":
           description: requisição inválida
         "404":
@@ -1098,6 +1094,12 @@ paths:
           type: integer
           format: int64
           default: 1001
+      requestBody:
+        description: Dados para atualização do canal de contato
+        content:
+          aplication/json:
+            schema:
+              $ref: '#/components/schemas/AtualizarContato'
       responses:
         "200":
           description: operação bem sucedida
@@ -1906,6 +1908,66 @@ components:
           example: artistaC
       xml:
         name: notificacao
+    Contato:
+      required:
+      - canal
+      - id
+      - link
+      - nome
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10001
+        canal:
+          type: string
+          example: Instagram
+        nome:
+          type: string
+          example: '@meu.instagram'
+        link:
+          type: string
+          example: http://www.instagram.com/meu.instagram
+      example:
+        link: http://www.instagram.com/meu.instagram
+        nome: '@meu.instagram'
+        id: 10001
+        canal: Instagram
+      xml:
+        name: contato
+    AtualizarContato:
+      type: object
+      properties:
+        canal:
+          type: string
+          example: Instagram
+        nome:
+          type: string
+          example: '@meu.instagram'
+        link:
+          type: string
+          example: http://www.instagram.com/meu.instagram
+      xml:
+        name: contato
+    NovoContato:
+      required:
+      - canal
+      - link
+      - nome
+      type: object
+      properties:
+        canal:
+          type: string
+          example: Instagram
+        nome:
+          type: string
+          example: '@meu.instagram'
+        link:
+          type: string
+          example: http://www.instagram.com/meu.instagram
+      xml:
+        name: contato
     Obra:
       required:
       - dataCarregamento
@@ -2003,6 +2065,14 @@ components:
           example: 10
       example:
         id: 10
+    inline_response_201_1:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 10001
+      example:
+        id: 10001
     AtualizacaoExposicao_paineis:
       required:
       - id
