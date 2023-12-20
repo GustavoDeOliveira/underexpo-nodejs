@@ -42,29 +42,7 @@ exports.adicionarContato = function(body) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = {
-  "id" : 10001
-};
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
-}
-
-
-/**
- * Adicionar canal de contato ao perfil do usuario
- * Adiciona um canal de contato ao perfil da conta da sessão atual
- *
- * body NovoContato Dados de contato a serem cadastrados. (optional)
- * returns inline_response_201_1
- **/
-exports.adicionarContato = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-  "id" : 10001
+  "id" : 10002
 };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -153,7 +131,7 @@ exports.buscarContatoPorId = function(id) {
     examples['application/json'] = {
   "link" : "http://www.instagram.com/meu.instagram",
   "nome" : "@meu.instagram",
-  "id" : 10001,
+  "id" : id,
   "canal" : "Instagram"
 };
     if (Object.keys(examples).length > 0) {
@@ -177,10 +155,10 @@ exports.buscarContatos = function(pagina,quantidade) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
-  "link" : "http://www.instagram.com/meu.instagram",
-  "nome" : "@meu.instagram",
-  "id" : 10001,
-  "canal" : "Instagram"
+  "link" : "http://www.youtube.com/meu.youtube",
+  "nome" : "Meu Canal",
+  "id" : 10000,
+  "canal" : "YouTube"
 }, {
   "link" : "http://www.instagram.com/meu.instagram",
   "nome" : "@meu.instagram",
