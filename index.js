@@ -1,27 +1,48 @@
 'use strict';
 
-var path = require('path');
-var http = require('http');
-var cors = require('cors');
-var express = require('express');
+const path = require('path');
+const http = require('http');
+const cors = require('cors');
+const express = require('express');
 
-var oas3Tools = require('oas3-tools');
-var serverPort = 8080;
+const { logError, returnError, isOperationalError, logErrorMiddleware } = require('./errorHandler/ErrorHandler');
+
+const oas3Tools = require('oas3-tools');
+const jwtTokenValidator = require('./utils/authenticator');
+
+const serverPort = 8080;
+const environment = process.env.NODE_ENV || 'development';
 
 // swaggerRouter configuration
-var options = {
+const options = {
     routing: {
         controllers: path.join(__dirname, './controllers')
     },
 };
 
-var expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
-var openApiApp = expressAppConfig.getApp();
+const expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
+const openApiApp = expressAppConfig.getApp();
 
 const app = express();
 
 // Add headers
-app.use(/.*/, cors({ methods: '*', allowedHeaders: 'Content-Type, api_key, Authorization' }));
+app.use(/.*/, cors({ methods: '*', allowedHeaders: 'Content-Type, api_key, Authorization, x-user-key' }));
+app.use(jwtTokenValidator.validateTokenMiddleware);
+
+app.use(logErrorMiddleware);
+app.use(returnError);
+
+process.on('unhandledRejection', error => {
+    throw error
+})
+
+process.on('uncaughtException', error => {
+    logError(error)
+
+    if (!isOperationalError(error) && environment === 'production') {
+        process.exit(1)
+    }
+})
 
 for (let i = 2; i < openApiApp._router.stack.length; i++) {
     app._router.stack.push(openApiApp._router.stack[i])

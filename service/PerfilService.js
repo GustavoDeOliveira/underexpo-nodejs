@@ -1,5 +1,7 @@
 'use strict';
 
+const repository = require('../repositories/PerfilRepository')
+const inviteRepository = require('../repositories/ConviteRepository')
 
 /**
  * Aceitar um convite para exposição a partir de uma notificação
@@ -58,25 +60,32 @@ exports.adicionarContato = function(body) {
  * Adiciona uma obra ao acervo do usuário.
  *
  * body NovaObra Dados da obra a ser carregada no acervo. (optional)
- * no response value expected for this operation
+ * returns Obra
  **/
 exports.adicionarObra = function(body) {
   return new Promise(function(resolve, reject) {
-    resolve();
-  });
-}
-
-
-/**
- * Carregar obra no acervo do usuário
- * Adiciona uma obra ao acervo do usuário.
- *
- * body NovaObra Dados da obra a ser carregada no acervo. (optional)
- * no response value expected for this operation
- **/
-exports.adicionarObra = function(body) {
-  return new Promise(function(resolve, reject) {
-    resolve();
+    var examples = {};
+    examples['application/json'] = {
+      "audio": {
+        "tipo" : "audio",
+        "nome" : "Áudio A",
+        "id" : 10001,
+        "dataCarregamento" : "2024-01-10",
+        "url" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx"
+      },
+      "imagem": {
+        "tipo" : "imagem",
+        "nome" : "Imagem A",
+        "id" : 10002,
+        "dataCarregamento" : "2024-01-10",
+        "url" : "https://picsum.photos/200"
+      }
+    };
+    if (Object.keys(examples).length > 0) {
+      resolve(examples[Object.keys(examples)[0]][body.tipo]);
+    } else {
+      resolve();
+    }
   });
 }
 
@@ -85,7 +94,7 @@ exports.adicionarObra = function(body) {
  * Atualizar canal de contato
  * Atualiza um canal de contato
  *
- * body AtualizarContato Dados para atualização do canal de contato (optional)
+ * body AtualizacaoContato Dados para atualização do canal de contato (optional)
  * id Long id do contato
  * no response value expected for this operation
  **/
@@ -100,8 +109,9 @@ exports.atualizarContato = function(body,id) {
  * Editar obra do acervo do usuário
  * Edita uma obra do acervo do usuário.
  *
+ * body AtualizacaoObra  (optional)
  * id Long ID da obra a ser atualizada
- * returns AtualizarObra
+ * no response value expected for this operation
  **/
 exports.atualizarObra = function(id) {
   return new Promise(function(resolve, reject) {
@@ -248,17 +258,10 @@ exports.buscarNotificacoes = function(pagina,quantidade) {
  **/
 exports.buscarPerfis = function(chave) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "nome" : "artistaA"
-}, {
-  "nome" : "artistaB"
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+    repository.searchByUsername(chave)
+    .then(data => {
+      resolve(data.map(item => ({id: item.id, nome: item.username})));
+    }).catch(reason => reject(reason));
   });
 }
 
@@ -273,60 +276,29 @@ exports.carregarMeusPaineis = function() {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
-  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
+  "urlMiniatura" : "https://picsum.photos/200",
   "nome" : "Painel A",
   "id" : 10,
   "autor" : "artistaB",
   "exposicao" : {
-    "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
+    "urlMiniatura" : "https://picsum.photos/200",
     "nome" : "Exposição A",
     "id" : 10,
     "descricao" : "lorem ipsum",
     "organizador" : "artistaB"
   }
 }, {
-  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
+  "urlMiniatura" : "https://picsum.photos/200",
   "nome" : "Painel A",
   "id" : 10,
   "autor" : "artistaB",
   "exposicao" : {
-    "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
+    "urlMiniatura" : "https://picsum.photos/200",
     "nome" : "Exposição A",
     "id" : 10,
     "descricao" : "lorem ipsum",
     "organizador" : "artistaB"
   }
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
-}
-
-
-/**
- * Carregar exposições organizadas pelo usuário
- * Carrega as exposições que o usuário organizou.
- *
- * returns List
- **/
-exports.carregarMinhasExposicoes = function() {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
-  "nome" : "Exposição C",
-  "descricao": "Lorem ipsum sit dolor amet.",
-  "id" : 12,
-  "organizador" : "euMesmo"
-}, {
-  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
-  "nome" : "Exposição D",
-  "descricao": "Lorem ipsum sit dolor amet. Nam vel ex non orci placerat efficitur et quis magna. Nam quis viverra eros. Fusce ut suscipit massa. Duis bibendum, ligula in commodo lobortis, nibh augue iaculis ipsum, eu pulvinar erat nibh ac neque. Vestibulum ac eleifend augue. Cras in elementum odio.",
-  "id" : 13,
-  "organizador" : "euMesmo"
 } ];
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -352,7 +324,7 @@ exports.carregarObra = function(id) {
   "nome" : "Imagem A",
   "id" : 10,
   "dataCarregamento" : "2000-01-23",
-  "url" : "https://source.unsplash.com/random?wallpapers"
+  "url" : "https://picsum.photos/200"
 };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -379,16 +351,23 @@ exports.carregarObras = function(pagina,quantidade,tipo,ordenacao) {
     examples['application/json'] = [ {
   "tipo" : "imagem",
   "nome" : "Imagem A",
-  "id" : 10,
-  "dataCarregamento" : "2000-01-23",
-  "url" : "https://source.unsplash.com/random?wallpapers"
+  "id" : 20001,
+  "dataCarregamento" : "2000-01-24",
+  "url" : "https://picsum.photos/200"
 }, {
   "tipo" : "imagem",
-  "nome" : "Imagem A",
-  "id" : 10,
+  "nome" : "Imagem B",
+  "id" : 20002,
   "dataCarregamento" : "2000-01-23",
-  "url" : "https://source.unsplash.com/random?wallpapers"
-} ];
+  "url" : "https://picsum.photos/200"
+},
+{
+  "tipo" : "audio",
+  "nome" : "Áudio A",
+  "id" : 20003,
+  "dataCarregamento" : "2024-01-10",
+  "url" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx"
+}, ];
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -407,44 +386,11 @@ exports.carregarObras = function(pagina,quantidade,tipo,ordenacao) {
  **/
 exports.enviarNotificacao = function(body) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-  "artista" : "artistaA",
-  "expoId" : 10,
-  "id" : 1001
-};
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+    inviteRepository.create(body)
+    .then(data => resolve({artista: data.username, expoId: data.expo_id, id: data.id}))
+    .catch(reason => reject(reason));
   });
 }
-
-
-/**
- * Enviar uma notificação convidando um usuário para uma exposição
- * Envia um convite para participação em uma exposição
- *
- * body NovaNotificacao Dados da exposição, painel e artista que será convidado. (optional)
- * returns ConviteExposicao
- **/
-exports.enviarNotificacao = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-  "artista" : "artistaA",
-  "expoId" : 10,
-  "id" : 1001
-};
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
-}
-
 
 /**
  * Remover canal de contato

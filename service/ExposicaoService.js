@@ -1,5 +1,8 @@
 'use strict';
 
+const Api403Error = require('../errorHandler/errors/api403Error');
+const Api404Error = require('../errorHandler/errors/api404Error');
+const repository = require('../repositories/ExposicaoRepository')
 
 /**
  * Adicionar uma imagem de miniatura a uma exposição
@@ -9,8 +12,8 @@
  * expoId Long ID da exposição cuja miniatura será atualizada
  * no response value expected for this operation
  **/
-exports.adicionarMiniaturaExposicao = function(body,expoId) {
-  return new Promise(function(resolve, reject) {
+exports.adicionarMiniaturaExposicao = function (body, expoId) {
+  return new Promise(function (resolve, reject) {
     resolve();
   });
 }
@@ -24,27 +27,20 @@ exports.adicionarMiniaturaExposicao = function(body,expoId) {
  * expoId Long ID da exposição cujas informações serão atualizadas
  * no response value expected for this operation
  **/
-exports.atualizarExposicao = function(body,expoId) {
-  return new Promise(function(resolve, reject) {
-    resolve();
+exports.atualizarExposicao = function (body, expoId) {
+  return new Promise(function (resolve, reject) {
+    repository.isAuthor(expoId, body.userId)
+      .then(data => {
+        if (!data) {
+          reject(new Api403Error("Usuário mão tem permissão de edição neste item."));
+        }
+        else {
+          repository.update(expoId, body)
+            .then(result => resolve(result)).catch(reason => reject(reason));
+        }
+      });
   });
 }
-
-
-/**
- * Alterar informações em uma exposição
- * Atualiza as informações de uma exposição. Também irá alterar a ordem dos paineis que forem informados
- *
- * body AtualizacaoExposicao Conteúdos que serão atualizados na exposição. Campos não informados não serão alterados.
- * expoId Long ID da exposição cujas informações serão atualizadas
- * no response value expected for this operation
- **/
-exports.atualizarExposicao = function(body,expoId) {
-  return new Promise(function(resolve, reject) {
-    resolve();
-  });
-}
-
 
 /**
  * Alterar informações de um painel
@@ -57,30 +53,11 @@ o elemento com o id informado será removido do painel.
  * painelId Long ID do painel a ser atualizado
  * no response value expected for this operation
  **/
-exports.atualizarPainel = function(body,expoId,painelId) {
-  return new Promise(function(resolve, reject) {
+exports.atualizarPainel = function (body, expoId, painelId) {
+  return new Promise(function (resolve, reject) {
     resolve();
   });
 }
-
-
-/**
- * Alterar informações de um painel
- * Atualiza informações de um painel, assim como seus elementos.
- *
- * body AtualizacaoPainel Informações a atualizar no painel.
-Caso a propriedade 'remover' de um elemento seja 'true',
-o elemento com o id informado será removido do painel.
- * expoId Long ID da exposição cujo painel a ser atualizado pertence
- * painelId Long ID do painel a ser atualizado
- * no response value expected for this operation
- **/
-exports.atualizarPainel = function(body,expoId,painelId) {
-  return new Promise(function(resolve, reject) {
-    resolve();
-  });
-}
-
 
 /**
  * Buscar exposições publicadas com paginação
@@ -90,39 +67,40 @@ exports.atualizarPainel = function(body,expoId,painelId) {
  * quantidade Integer Quantidade de registros a serem buscados
  * returns List
  **/
-exports.buscarExposicoesPublicadas = function(pagina,quantidade) {
+exports.buscarExposicoesPublicadas = function (pagina, quantidade) {
+  return new Promise(function (resolve, reject) {
+    repository.readPaged(pagina, quantidade)
+      .then(data => {
+        resolve(data.map(item => ({
+          urlMiniatura: item.miniature_url,
+          nome: item.name,
+          descricao: item.description,
+          id: item.id,
+          organizador: item.username
+        })));
+      }).catch(reason => reject(reason));
+  });
+}
+
+
+/**
+ * Carregar exposições organizadas pelo usuário
+ * Carrega as exposições que o usuário organizou.
+ *
+ * returns List
+ **/
+exports.carregarMinhasExposicoes = function(userId) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
-  "nome" : "Exposição A",
-  "descricao": "Lorem ipsum sit dolor amet.",
-  "id" : 10,
-  "organizador" : "artistaB"
-}, {
-  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
-  "nome" : "Exposição B",
-  "descricao": "Lorem ipsum sit dolor amet. Nam vel ex non orci placerat efficitur et quis magna. Nam quis viverra eros. Fusce ut suscipit massa. Duis bibendum, ligula in commodo lobortis, nibh augue iaculis ipsum, eu pulvinar erat nibh ac neque. Vestibulum ac eleifend augue. Cras in elementum odio.",
-  "id" : 11,
-  "organizador" : "artistaA"
-}, {
-  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
-  "nome" : "Exposição C",
-  "descricao": "Lorem ipsum sit dolor amet.",
-  "id" : 12,
-  "organizador" : "euMesmo"
-}, {
-  "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
-  "nome" : "Exposição D",
-  "descricao": "Lorem ipsum sit dolor amet. Nam vel ex non orci placerat efficitur et quis magna. Nam quis viverra eros. Fusce ut suscipit massa. Duis bibendum, ligula in commodo lobortis, nibh augue iaculis ipsum, eu pulvinar erat nibh ac neque. Vestibulum ac eleifend augue. Cras in elementum odio.",
-  "id" : 13,
-  "organizador" : "euMesmo"
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+    repository.readByUserId(userId)
+    .then(data => {
+      resolve(data.map(item => ({
+        id: item.id,
+        urlMiniatura: item.miniature_url,
+        nome: item.name,
+        descricao: item.description,
+        organizador: item.username
+      })))
+    }).catch(reason => reject(reason));
   });
 }
 
@@ -134,39 +112,30 @@ exports.buscarExposicoesPublicadas = function(pagina,quantidade) {
  * expoId Long ID da exposição a ser carregada
  * returns Exposicao
  **/
-exports.carregarExposicaoPorId = function(expoId) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-  "convites" : [ {
-    "artista" : "artistaA",
-    "expoId" : 10,
-    "id" : 1001
-  }, {
-    "artista" : "artistaB",
-    "expoId" : 10,
-    "id" : 1002
-  } ],
-  "paineis" : [ {
-    "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
-    "nome" : "Painel A",
-    "id" : 10,
-    "autor" : "artistaB"
-  }, {
-    "urlMiniatura" : "https://source.unsplash.com/random?wallpapers",
-    "nome" : "Painel B",
-    "id" : 11,
-    "autor" : "artistaA"
-  } ],
-  "nome" : expoId === 10 ? "Exposição A" : "Exposição B",
-  "descricao" : "Lorem ipsum dolor sit amet.",
-  "organizador" : "artistaB"
-};
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+exports.carregarExposicaoPorId = function (expoId) {
+  return new Promise(function (resolve, reject) {
+    repository.read(expoId).then(result => {
+      if (!result) {
+        reject(new Api404Error("Exposição não encontrada."));
+      } else {
+        resolve({
+          "convites": result.invites.map(invite => ({
+            "artista": invite.username,
+            "expoId": result.id,
+            "id": invite.id
+          })),
+          "paineis": result.panels.map(panel => ({
+            "urlMiniatura": panel.miniature_url,
+            "nome": panel.name,
+            "id": panel.id,
+            "autor": panel.username
+          })),
+          "nome": result.name,
+          "descricao": result.description,
+          "organizador": result.username
+        })
+      }
+    }).catch(reason => reject(reason));
   });
 }
 
@@ -179,62 +148,62 @@ exports.carregarExposicaoPorId = function(expoId) {
  * painelId Long ID do painel a ser carregado
  * returns Painel
  **/
-exports.carregarPainelPorId = function(expoId,painelId) {
-  return new Promise(function(resolve, reject) {
+exports.carregarPainelPorId = function (expoId, painelId) {
+  return new Promise(function (resolve, reject) {
     var examples = {};
     examples[10] = {
-      "elementos" : [ {
-        "tipo" : "texto",
-        "conteudo" : "Lorem ipsum dolor sit amet.",
-        "titulo" : "Título do Elemento",
-        "id" : 100
+      "elementos": [{
+        "tipo": "texto",
+        "conteudo": "Lorem ipsum dolor sit amet.",
+        "titulo": "Título do Elemento",
+        "id": 100
       }, {
-        "tipo" : "audio",
-        "conteudo" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
-        "titulo" : "Elemento de Áudio",
-        "id" : 101
+        "tipo": "audio",
+        "conteudo": "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
+        "titulo": "Elemento de Áudio",
+        "id": 101
       }, {
-        "tipo" : "texto",
-        "conteudo" : "Lorem ipsum dolor sit amet.",
-        "id" : 102
+        "tipo": "texto",
+        "conteudo": "Lorem ipsum dolor sit amet.",
+        "id": 102
       }, {
-        "tipo" : "audio",
-        "conteudo" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
-        "titulo" : "Elementos de Áudio",
-        "id" : 103
+        "tipo": "audio",
+        "conteudo": "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
+        "titulo": "Elementos de Áudio",
+        "id": 103
       }, {
-        "tipo" : "audio",
-        "conteudo" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
-        "id" : 104
+        "tipo": "audio",
+        "conteudo": "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
+        "id": 104
       }, {
-        "tipo" : "audio",
-        "conteudo" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
-        "id" : 105
+        "tipo": "audio",
+        "conteudo": "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
+        "id": 105
       }, {
-        "tipo" : "audio",
-        "conteudo" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
-        "id" : 106
-      }, ],
-      "nome" : "Painel A",
-      "autor" : "artistaB"
+        "tipo": "audio",
+        "conteudo": "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
+        "id": 106
+      },],
+      "nome": "Painel A",
+      "autor": "artistaB"
     };
     examples[11] = {
-      "elementos" : [ {
-        "tipo" : "texto",
-        "conteudo" : "Lorem dolor ipsum sit amet.",
-        "titulo" : "Título do Elemento",
-        "id" : 102
+      "elementos": [{
+        "tipo": "texto",
+        "conteudo": "Lorem dolor ipsum sit amet.",
+        "titulo": "Título do Elemento",
+        "id": 102
       }, {
-        "tipo" : "imagem",
-        "conteudo" : "https://source.unsplash.com/random?wallpapers",
-        "id" : 103
+        "tipo": "imagem",
+        "conteudo": "https://picsum.photos/200",
+        "id": 103
       }, {
-        "tipo" : "video",
-        "conteudo" : "oy4cbqE1_qc",
-        "id" : 104
-      } ],
-      "nome" : "Painel B",
-      "autor" : "artistaA"
+        "tipo": "video",
+        "conteudo": "oy4cbqE1_qc",
+        "id": 104
+      }],
+      "nome": "Painel B",
+      "autor": "artistaA"
     };
     if (examples[painelId]) {
       resolve(examples[painelId]);
@@ -253,8 +222,8 @@ exports.carregarPainelPorId = function(expoId,painelId) {
  * expoId Long ID da exposição onde o painel será criado
  * no response value expected for this operation
  **/
-exports.criarPainel = function(body,expoId) {
-  return new Promise(function(resolve, reject) {
+exports.criarPainel = function (body, expoId) {
+  return new Promise(function (resolve, reject) {
     resolve();
   });
 }
@@ -268,8 +237,8 @@ exports.criarPainel = function(body,expoId) {
  * expoId Long ID da exposição onde o painel será criado
  * no response value expected for this operation
  **/
-exports.criarPainel = function(body,expoId) {
-  return new Promise(function(resolve, reject) {
+exports.criarPainel = function (body, expoId) {
+  return new Promise(function (resolve, reject) {
     resolve();
   });
 }
@@ -283,8 +252,8 @@ exports.criarPainel = function(body,expoId) {
  * expoId Long ID da exposição a ser denunciada
  * no response value expected for this operation
  **/
-exports.denunciarExposicao = function(body,expoId) {
-  return new Promise(function(resolve, reject) {
+exports.denunciarExposicao = function (body, expoId) {
+  return new Promise(function (resolve, reject) {
     resolve();
   });
 }
@@ -298,8 +267,8 @@ exports.denunciarExposicao = function(body,expoId) {
  * expoId Long ID da exposição a ser denunciada
  * no response value expected for this operation
  **/
-exports.denunciarExposicao = function(body,expoId) {
-  return new Promise(function(resolve, reject) {
+exports.denunciarExposicao = function (body, expoId) {
+  return new Promise(function (resolve, reject) {
     resolve();
   });
 }
@@ -313,8 +282,8 @@ exports.denunciarExposicao = function(body,expoId) {
  * painelId Long ID do painel a ser removido
  * no response value expected for this operation
  **/
-exports.excluirPainel = function(expoId,painelId) {
-  return new Promise(function(resolve, reject) {
+exports.excluirPainel = function (expoId, painelId) {
+  return new Promise(function (resolve, reject) {
     resolve();
   });
 }
@@ -324,20 +293,22 @@ exports.excluirPainel = function(expoId,painelId) {
  * Organizar uma nova exposição
  * Adiciona uma nova exposição em modo rascunho
  *
- * body NovaExposicao Create a new pet in the store
+ * body NovaExposicao Dados da nova exposição
  * returns inline_response_201
  **/
-exports.organizarExposicao = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-  "id" : 13
-};
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
+exports.organizarExposicao = function (body) {
+  return new Promise(async function (resolve, reject) {
+    let id = 0;
+    try {
+      await repository.create(body);
+    } catch (error) {
+      reject(error);
     }
+
+    if (!id)
+      reject(new Api404Error("Não foi possível encontrar Exposição criada."));
+
+    resolve({ id });
   });
 }
 
@@ -349,8 +320,8 @@ exports.organizarExposicao = function(body) {
  * expoId Long ID da exposição cujas informações serão atualizadas
  * no response value expected for this operation
  **/
-exports.removerExposicao = function(expoId) {
-  return new Promise(function(resolve, reject) {
+exports.removerExposicao = function (expoId) {
+  return new Promise(function (resolve, reject) {
     resolve();
   });
 }
@@ -363,8 +334,8 @@ exports.removerExposicao = function(expoId) {
  * expoId Long ID da exposição cuja miniatura será removida
  * no response value expected for this operation
  **/
-exports.removerMiniaturaExposicao = function(expoId) {
-  return new Promise(function(resolve, reject) {
+exports.removerMiniaturaExposicao = function (expoId) {
+  return new Promise(function (resolve, reject) {
     resolve();
   });
 }

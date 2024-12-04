@@ -1,7 +1,8 @@
 'use strict';
 
-var utils = require('../utils/writer.js');
-var Perfil = require('../service/PerfilService');
+const utils = require('../utils/writer.js');
+const Perfil = require('../service/PerfilService');
+const Exposicao = require('../service/ExposicaoService');
 
 module.exports.aceitarConviteNotificacao = function aceitarConviteNotificacao (req, res, next, id) {
   Perfil.aceitarConviteNotificacao(id)
@@ -73,8 +74,8 @@ module.exports.atualizarContato = function atualizarContato (req, res, next, bod
     });
 };
 
-module.exports.atualizarObra = function atualizarObra (req, res, next, id) {
-  Perfil.atualizarObra(id)
+module.exports.atualizarObra = function atualizarObra (req, res, next, body, id) {
+  Perfil.atualizarObra(body, id)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -144,7 +145,7 @@ module.exports.carregarMeusPaineis = function carregarMeusPaineis (req, res, nex
 };
 
 module.exports.carregarMinhasExposicoes = function carregarMinhasExposicoes (req, res, next) {
-  Perfil.carregarMinhasExposicoes()
+  Exposicao.carregarMinhasExposicoes(req.userId)
     .then(function (response) {
       utils.writeJson(res, response);
     })

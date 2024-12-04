@@ -14,16 +14,7 @@ module.exports.adicionarMiniaturaExposicao = function adicionarMiniaturaExposica
 };
 
 module.exports.atualizarExposicao = function atualizarExposicao (req, res, next, body, expoId) {
-  Exposicao.atualizarExposicao(body, expoId)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
-
-module.exports.atualizarExposicao = function atualizarExposicao (req, res, next, body, expoId) {
+  body.userId = req.userId;
   Exposicao.atualizarExposicao(body, expoId)
     .then(function (response) {
       utils.writeJson(res, response);
@@ -34,16 +25,7 @@ module.exports.atualizarExposicao = function atualizarExposicao (req, res, next,
 };
 
 module.exports.atualizarPainel = function atualizarPainel (req, res, next, body, expoId, painelId) {
-  Exposicao.atualizarPainel(body, expoId, painelId)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
-
-module.exports.atualizarPainel = function atualizarPainel (req, res, next, body, expoId, painelId) {
+  body.userId = req.userId;
   Exposicao.atualizarPainel(body, expoId, painelId)
     .then(function (response) {
       utils.writeJson(res, response);
@@ -134,16 +116,7 @@ module.exports.excluirPainel = function excluirPainel (req, res, next, expoId, p
 };
 
 module.exports.organizarExposicao = function organizarExposicao (req, res, next, body) {
-  Exposicao.organizarExposicao(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
-
-module.exports.organizarExposicao = function organizarExposicao (req, res, next, body) {
+  body.userId = req.userId;
   Exposicao.organizarExposicao(body)
     .then(function (response) {
       utils.writeJson(res, response);

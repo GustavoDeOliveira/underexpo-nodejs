@@ -1,3 +1,5 @@
+const BaseError = require("../errorHandler/errors/BaseError");
+
 var ResponsePayload = function(code, payload) {
   this.code = code;
   this.payload = payload;
@@ -10,6 +12,16 @@ exports.respondWithCode = function(code, payload) {
 var writeJson = exports.writeJson = function(response, arg1, arg2) {
   var code;
   var payload;
+
+  if (arg1 && arg1 instanceof BaseError) {
+    writeJson(response, arg1.name, arg1.statusCode);
+    return;
+  }
+
+  if (arg1 && arg1 instanceof Error) {
+    writeJson(response, 'Ocorreu um erro inesperado.', 500);
+    return;
+  }
 
   if(arg1 && arg1 instanceof ResponsePayload) {
     writeJson(response, arg1.payload, arg1.code);
