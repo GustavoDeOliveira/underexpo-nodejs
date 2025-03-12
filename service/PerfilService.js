@@ -1,7 +1,10 @@
 'use strict';
 
-const repository = require('../repositories/PerfilRepository')
-const inviteRepository = require('../repositories/ConviteRepository')
+const repository = require('../repositories/PerfilRepository');
+const inviteRepository = require('../repositories/ConviteRepository');
+const panelRepository = require('../repositories/PainelRepository');
+const workRepository = require('../repositories/ObraRepository');
+const fileManager = require('../utils/fileManager');
 
 /**
  * Aceitar um convite para exposição a partir de uma notificação
@@ -12,7 +15,9 @@ const inviteRepository = require('../repositories/ConviteRepository')
  **/
 exports.aceitarConviteNotificacao = function(id) {
   return new Promise(function(resolve, reject) {
-    resolve();
+    const result = inviteRepository.accept(id)
+    .then(response => resolve(response))
+    .catch(reason => reject(reason));
   });
 }
 
@@ -26,9 +31,19 @@ Deve ser de um formato suportado pelo tipo da obra
  * id Long ID da obra a qual o arquivo pertencerá
  * no response value expected for this operation
  **/
-exports.adicionarArquivoObra = function(body,id) {
+exports.adicionarArquivoObra = function(body,id,mimeType) {
   return new Promise(function(resolve, reject) {
-    resolve();
+    fileManager.upload('underexpo-teste', 'work-' + Date.now(), body, mimeType)
+    .then(uploadResult => {
+      workRepository.update(id, uploadResult)
+      .then(result => resolve({
+        "tipo" : result.type,
+        "nome" : result.title,
+        "conteudo": result.content,
+        "id" : result.id,
+        "dataCarregamento" : result.created_at
+      })).catch(reject);
+    });
   });
 }
 
@@ -62,30 +77,15 @@ exports.adicionarContato = function(body) {
  * body NovaObra Dados da obra a ser carregada no acervo. (optional)
  * returns Obra
  **/
-exports.adicionarObra = function(body) {
+exports.adicionarObra = function(userId, body) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-      "audio": {
-        "tipo" : "audio",
-        "nome" : "Áudio A",
-        "id" : 10001,
-        "dataCarregamento" : "2024-01-10",
-        "url" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx"
-      },
-      "imagem": {
-        "tipo" : "imagem",
-        "nome" : "Imagem A",
-        "id" : 10002,
-        "dataCarregamento" : "2024-01-10",
-        "url" : "https://picsum.photos/200"
-      }
-    };
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]][body.tipo]);
-    } else {
-      resolve();
-    }
+    workRepository.create(userId, body)
+    .then(result => resolve({
+      "tipo" : result.type,
+      "nome" : result.title,
+      "id" : result.id,
+      "dataCarregamento" : result.created_at
+    }));
   });
 }
 
@@ -220,31 +220,19 @@ exports.buscarNotificacaoPorId = function(id) {
  * quantidade Integer Quantidade de registros a serem buscados
  * returns List
  **/
-exports.buscarNotificacoes = function(pagina,quantidade) {
+exports.buscarNotificacoes = function(pagina,quantidade,userId) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "id" : 1001,
-  "expo" : {
-    "painelId" : 11,
-    "nome" : "Exposição A",
-    "id" : 10,
-    "organizador" : "artistaB"
-  }
-}, {
-  "id" : 1001,
-  "expo" : {
-    "painelId" : 11,
-    "nome" : "Exposição A",
-    "id" : 10,
-    "organizador" : "artistaB"
-  }
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+    inviteRepository.readByUserId(userId)
+    .then(results => resolve(results.map(result => ({
+      "id": result.id,
+      "status": result.status,
+      "expo": {
+        "id": result.expo_id,
+        "nome": result.expo_name,
+        "organizador": result.username
+      }
+    }))))
+    .catch(reject);
   });
 }
 
@@ -272,39 +260,22 @@ exports.buscarPerfis = function(chave) {
  *
  * returns List
  **/
-exports.carregarMeusPaineis = function() {
+exports.carregarMeusPaineis = function(userId) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "urlMiniatura" : "https://picsum.photos/200",
-  "nome" : "Painel A",
-  "id" : 10,
-  "autor" : "artistaB",
-  "exposicao" : {
-    "urlMiniatura" : "https://picsum.photos/200",
-    "nome" : "Exposição A",
-    "id" : 10,
-    "descricao" : "lorem ipsum",
-    "organizador" : "artistaB"
-  }
-}, {
-  "urlMiniatura" : "https://picsum.photos/200",
-  "nome" : "Painel A",
-  "id" : 10,
-  "autor" : "artistaB",
-  "exposicao" : {
-    "urlMiniatura" : "https://picsum.photos/200",
-    "nome" : "Exposição A",
-    "id" : 10,
-    "descricao" : "lorem ipsum",
-    "organizador" : "artistaB"
-  }
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+    panelRepository.readByUserId(userId)
+      .then(result => resolve(result.map(p => ({
+        "urlMiniatura" : p.minature_url,
+        "nome" : p.panel_name,
+        "id" : p.panel_id,
+        "autor" : p.panel_author,
+        "exposicao" : {
+          "urlMiniatura" : p.expo_miniature_url,
+          "nome" : p.expo_name,
+          "id" : p.expo_id,
+          "descricao" : p.expo_description,
+          "organizador" : p.expo_author
+        }
+      })))).catch(reject);
   });
 }
 
@@ -345,37 +316,19 @@ exports.carregarObra = function(id) {
  * ordenacao String Tipo de ordenacao para aplicar na busca (optional)
  * returns List
  **/
-exports.carregarObras = function(pagina,quantidade,tipo,ordenacao) {
+exports.carregarObras = function(userId,pagina,quantidade,tipo,ordenacao) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "tipo" : "imagem",
-  "nome" : "Imagem A",
-  "id" : 20001,
-  "dataCarregamento" : "2000-01-24",
-  "url" : "https://picsum.photos/200"
-}, {
-  "tipo" : "imagem",
-  "nome" : "Imagem B",
-  "id" : 20002,
-  "dataCarregamento" : "2000-01-23",
-  "url" : "https://picsum.photos/200"
-},
-{
-  "tipo" : "audio",
-  "nome" : "Áudio A",
-  "id" : 20003,
-  "dataCarregamento" : "2024-01-10",
-  "url" : "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx"
-}, ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+    workRepository.read(userId, pagina, quantidade, tipo, ordenacao)
+    .then(result => resolve(result.map(w => ({
+      "id" : w.id,
+      "tipo" : w.type,
+      "nome" : w.title,
+      "dataCarregamento" : w.created_at,
+      "url" : w.content
+    })))).catch(reject);
   });
 }
-
+0
 
 /**
  * Enviar uma notificação convidando um usuário para uma exposição

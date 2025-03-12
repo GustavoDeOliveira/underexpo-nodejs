@@ -444,6 +444,13 @@ paths:
       responses:
         "200":
           description: operação bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Painel'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Painel'
         "400":
           description: dados inválidos
         "404":
@@ -1241,11 +1248,19 @@ paths:
             schema:
               type: string
               format: binary
+          image/*:
+            schema:
+              type: string
+              format: binary
           audio/mp3:
             schema:
               type: string
               format: binary
           audio/wav:
+            schema:
+              type: string
+              format: binary
+          audio/*:
             schema:
               type: string
               format: binary
@@ -1508,11 +1523,11 @@ components:
             $ref: '#/components/schemas/Elemento'
       example:
         elementos:
-        - tipo: texto
+        - tipo: T
           conteudo: Lorem ipsum dolor sit amet.
           titulo: Título do Elemento
           id: 10
-        - tipo: texto
+        - tipo: T
           conteudo: Lorem ipsum dolor sit amet.
           titulo: Título do Elemento
           id: 10
@@ -1597,7 +1612,6 @@ components:
         name: painel
     AtualizacaoPainel:
       required:
-      - autor
       - nome
       type: object
       properties:
@@ -1628,10 +1642,10 @@ components:
           type: string
           description: tipo de elemento
           enum:
-          - texto
-          - imagem
-          - audio
-          - video
+          - T
+          - I
+          - A
+          - V
         conteudo:
           type: string
           description: |-
@@ -1639,15 +1653,13 @@ components:
             url para um arquivo de áudio ou url para um vídeo.
           example: Lorem ipsum dolor sit amet.
       example:
-        tipo: texto
+        tipo: T
         conteudo: Lorem ipsum dolor sit amet.
         titulo: Título do Elemento
         id: 10
       xml:
         name: elemento
     AtualizacaoElemento:
-      required:
-      - id
       type: object
       properties:
         id:
@@ -1673,8 +1685,10 @@ components:
           type: string
           description: tipo de elemento
           enum:
-          - texto
-          - obra
+          - T
+          - I
+          - A
+          - V
         conteudo:
           type: string
           description: "Conteúdo de texto plano, caso o elemento seja do tipo texto."

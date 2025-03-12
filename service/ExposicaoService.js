@@ -2,7 +2,8 @@
 
 const Api403Error = require('../errorHandler/errors/api403Error');
 const Api404Error = require('../errorHandler/errors/api404Error');
-const repository = require('../repositories/ExposicaoRepository')
+const repository = require('../repositories/ExposicaoRepository');
+const panelRepository = require('../repositories/PainelRepository');
 
 /**
  * Adicionar uma imagem de miniatura a uma exposição
@@ -55,9 +56,29 @@ o elemento com o id informado será removido do painel.
  **/
 exports.atualizarPainel = function (body, expoId, painelId) {
   return new Promise(function (resolve, reject) {
-    resolve();
+    panelRepository.update(painelId, body)
+      .then(result => {
+        panelRepository.read(painelId)
+          .then(p => {
+            if (p !== null) {
+              resolve({
+                "elementos": p.elements.map(e => ({
+                  "tipo": e.type,
+                  "conteudo": e.content,
+                  "titulo": e.title,
+                  "obraId": e.work_id,
+                  "id": e.id
+                })),
+                "nome": p.name,
+                "autor": p.username
+              });
+            } else {
+              throw new Api404Error("Não foi possível encontrar o painel.");
+            }
+          });
+      }).catch(reject);
   });
-}
+};
 
 /**
  * Buscar exposições publicadas com paginação
@@ -89,18 +110,18 @@ exports.buscarExposicoesPublicadas = function (pagina, quantidade) {
  *
  * returns List
  **/
-exports.carregarMinhasExposicoes = function(userId) {
-  return new Promise(function(resolve, reject) {
+exports.carregarMinhasExposicoes = function (userId) {
+  return new Promise(function (resolve, reject) {
     repository.readByUserId(userId)
-    .then(data => {
-      resolve(data.map(item => ({
-        id: item.id,
-        urlMiniatura: item.miniature_url,
-        nome: item.name,
-        descricao: item.description,
-        organizador: item.username
-      })))
-    }).catch(reason => reject(reason));
+      .then(data => {
+        resolve(data.map(item => ({
+          id: item.id,
+          urlMiniatura: item.miniature_url,
+          nome: item.name,
+          descricao: item.description,
+          organizador: item.username
+        })))
+      }).catch(reason => reject(reason));
   });
 }
 
@@ -150,66 +171,24 @@ exports.carregarExposicaoPorId = function (expoId) {
  **/
 exports.carregarPainelPorId = function (expoId, painelId) {
   return new Promise(function (resolve, reject) {
-    var examples = {};
-    examples[10] = {
-      "elementos": [{
-        "tipo": "texto",
-        "conteudo": "Lorem ipsum dolor sit amet.",
-        "titulo": "Título do Elemento",
-        "id": 100
-      }, {
-        "tipo": "audio",
-        "conteudo": "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
-        "titulo": "Elemento de Áudio",
-        "id": 101
-      }, {
-        "tipo": "texto",
-        "conteudo": "Lorem ipsum dolor sit amet.",
-        "id": 102
-      }, {
-        "tipo": "audio",
-        "conteudo": "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
-        "titulo": "Elementos de Áudio",
-        "id": 103
-      }, {
-        "tipo": "audio",
-        "conteudo": "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
-        "id": 104
-      }, {
-        "tipo": "audio",
-        "conteudo": "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
-        "id": 105
-      }, {
-        "tipo": "audio",
-        "conteudo": "https://ipfs.filebase.io/ipfs/Qmd186kdXdLp9xKEy7mxSYybZXN9LNxCHxJ94bPvtC69Sx",
-        "id": 106
-      },],
-      "nome": "Painel A",
-      "autor": "artistaB"
-    };
-    examples[11] = {
-      "elementos": [{
-        "tipo": "texto",
-        "conteudo": "Lorem dolor ipsum sit amet.",
-        "titulo": "Título do Elemento",
-        "id": 102
-      }, {
-        "tipo": "imagem",
-        "conteudo": "https://picsum.photos/200",
-        "id": 103
-      }, {
-        "tipo": "video",
-        "conteudo": "oy4cbqE1_qc",
-        "id": 104
-      }],
-      "nome": "Painel B",
-      "autor": "artistaA"
-    };
-    if (examples[painelId]) {
-      resolve(examples[painelId]);
-    } else {
-      resolve();
-    }
+    panelRepository.read(painelId)
+      .then(p => {
+        if (p !== null) {
+          resolve({
+            "elementos": p.elements.map(e => ({
+              "tipo": e.type,
+              "conteudo": e.content,
+              "titulo": e.title,
+              "obraId": e.work_id,
+              "id": e.id
+            })),
+            "nome": p.name,
+            "autor": p.username
+          });
+        } else {
+          throw new Api404Error("Não foi possível encontrar o painel.");
+        }
+      });
   });
 }
 

@@ -3,6 +3,7 @@
 const utils = require('../utils/writer.js');
 const Perfil = require('../service/PerfilService');
 const Exposicao = require('../service/ExposicaoService');
+const busboy = require('busboy');
 
 module.exports.aceitarConviteNotificacao = function aceitarConviteNotificacao (req, res, next, id) {
   Perfil.aceitarConviteNotificacao(id)
@@ -15,7 +16,8 @@ module.exports.aceitarConviteNotificacao = function aceitarConviteNotificacao (r
 };
 
 module.exports.adicionarArquivoObra = function adicionarArquivoObra (req, res, next, body, id) {
-  Perfil.adicionarArquivoObra(body, id)
+  const mimeType = req.headers['content-type'];
+  Perfil.adicionarArquivoObra(req.body, id, mimeType)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -45,17 +47,7 @@ module.exports.adicionarContato = function adicionarContato (req, res, next, bod
 };
 
 module.exports.adicionarObra = function adicionarObra (req, res, next, body) {
-  Perfil.adicionarObra(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
-
-module.exports.adicionarObra = function adicionarObra (req, res, next, body) {
-  Perfil.adicionarObra(body)
+  Perfil.adicionarObra(req.userId, body)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -115,7 +107,7 @@ module.exports.buscarNotificacaoPorId = function buscarNotificacaoPorId (req, re
 };
 
 module.exports.buscarNotificacoes = function buscarNotificacoes (req, res, next, pagina, quantidade) {
-  Perfil.buscarNotificacoes(pagina, quantidade)
+  Perfil.buscarNotificacoes(pagina, quantidade, req.userId)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -135,7 +127,7 @@ module.exports.buscarPerfis = function buscarPerfis (req, res, next, chave) {
 };
 
 module.exports.carregarMeusPaineis = function carregarMeusPaineis (req, res, next) {
-  Perfil.carregarMeusPaineis()
+  Perfil.carregarMeusPaineis(req.userId)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -165,7 +157,7 @@ module.exports.carregarObra = function carregarObra (req, res, next, id) {
 };
 
 module.exports.carregarObras = function carregarObras (req, res, next, pagina, quantidade, tipo, ordenacao) {
-  Perfil.carregarObras(pagina, quantidade, tipo, ordenacao)
+  Perfil.carregarObras(req.userId, pagina, quantidade, tipo, ordenacao)
     .then(function (response) {
       utils.writeJson(res, response);
     })

@@ -1,4 +1,5 @@
 'use strict';
+const Api404Error = require('../errorHandler/errors/api404Error');
 const ConnectionManager = require('./ConnectionManager');
 
 exports.create = async function (convite) {
@@ -22,33 +23,67 @@ exports.create = async function (convite) {
     }
 }
 
-exports.readByExternalId = async function (externalId) {
+exports.readByUserId = async function (userId) {
     const conn = await ConnectionManager.connect();
     try {
         if (conn) {
-            const values = [externalId];
-            const query = "SELECT id, username, created_at, updated_at FROM profile WHERE external_id = $1;";
+            const values = [userId];
+            const query = `
+                SELECT i.id, i.status, e.id AS expo_id, e.name AS expo_name, p.username
+                FROM invite i
+                INNER JOIN exposition e
+                    ON i.exposition_id = e.id
+                INNER JOIN profile p
+                    ON e.author_id = p.id
+                WHERE invitee_id = $1;`;
             const result = await conn.query(query, values);
-            if (result.rowCount === 1) {
-                return result.rows[0];
-            } else if (result.rowCount > 1) {
-                throw new Error(`Esperava carregar 1 linha, {${result.rowCount}} linhas foram carregadas.`);
-            }
-            return null;
+            return result.rows;
         }
     } finally {
         ConnectionManager.end(conn);
     }
 }
 
-exports.searchByUsername = async function (keyword) {
+exports.accept = async function (id) {
     const conn = await ConnectionManager.connect();
     try {
         if (conn) {
-            const values = ['%' + keyword + '%'];
-            const query = "SELECT username FROM profile WHERE username ILIKE $1 LIMIT 50";
+            await ConnectionManager.begin(conn);
+
+            const values = [id];
+            const query = "SELECT exposition_id, invitee_id, status FROM invite WHERE id = $1";
             const result = await conn.query(query, values);
-            return result.rows;
+            if (result.rowCount !== 1) {
+                await ConnectionManager.rollback(conn);
+                throw new Api404Error("Notificação não encontrada.")
+            }
+            const invite = result.rows[0];
+            if (invite.status.toLocaleUpperCase() !== 'P') {
+                await ConnectionManager.rollback(conn);
+                throw new Error("Notificação não pode ser aceita.");
+            }
+            
+            const newPanelValues = [invite.exposition_id, invite.invitee_id, 'Meu novo Painel!', 'R'];
+            const newPanelQuery = `INSERT INTO panel (created_at, updated_at, exposition_id, author_id, name, status)
+                                            VALUES (NOW(), null, $1, $2, $3, $4) RETURNING id;`;
+            const newPanelResult = await conn.query(newPanelQuery, newPanelValues);
+            if (result.rowCount !== 1) {
+                await ConnectionManager.rollback(conn);
+                throw new Error("Não foi possível criar o Painel.");
+            }
+            
+            const inviteQuery = `
+                UPDATE invite SET updated_at = NOW(), status = 'A' WHERE id = $1;
+            `;
+            const inviteValues = [id];
+            const inviteResult = await conn.query(inviteQuery, inviteValues);
+            if (inviteResult.rowCount !== 1) {
+                await ConnectionManager.rollback(conn);
+                throw new Error("Não foi possível atualizar o Convite.");
+            }
+
+            ConnectionManager.commit(conn);
+            return newPanelResult.rows[0];
         }
     } finally {
         ConnectionManager.end(conn);

@@ -6,7 +6,10 @@ exports.create = async function (exposicao) {
     try {
         if (conn) {
             const values = [exposicao.nome, exposicao.descricao, exposicao.userId];
-            const query = "INSERT INTO exposition (created_at, updated_at, name, description, status, miniature_url, author_id) VALUES (NOW(), NULL, $1, $2, 'R', NULL, $3) RETURNING id;";
+            const query = `
+                INSERT INTO exposition
+                (created_at, updated_at, name, description, status, miniature_url, author_id)
+                VALUES (NOW(), NULL, $1, $2, 'R', NULL, $3) RETURNING id;`;
             await ConnectionManager.begin(conn);
             const result = await conn.query(query, values);
             if (result.rowCount === 1) {
@@ -73,11 +76,11 @@ exports.read = async function (id) {
     }
 }
 
-exports.readPaged = async function (pagina, tamanho) {
+exports.readPaged = async function (page, pageSize) {
     const conn = await ConnectionManager.connect();
     try {
         if (conn) {
-            const values = [(pagina - 1) * tamanho, tamanho];
+            const values = [(page - 1) * pageSize, pageSize];
             const query = `
         SELECT e.id, e.name, e.description, e.miniature_url, p.username
         FROM exposition e
@@ -109,7 +112,7 @@ exports.update = async function (id, body) {
             const query = `
             UPDATE exposition
             SET ` + set.map((s, i) => `${s.name} = $${i+2}`).join(', ') +
-            `, updated_at = now() WHERE id = $1
+            `, updated_at = NOW() WHERE id = $1
             `;
             const result = await conn.query(query, values);
             if (result.rowCount === 1) {
