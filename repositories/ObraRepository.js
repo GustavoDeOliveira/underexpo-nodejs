@@ -9,7 +9,12 @@ exports.read = async function(userId, page, pageSize, filters, ordering) {
             const query = `
                 SELECT id, title, type, created_at, content
                 FROM work
-                WHERE author_id = $1
+                WHERE author_id = $1 
+                ${filters === 'audio' 
+                    ? "AND type = 'A' "
+                : filters === 'imagem' 
+                    ? "AND type = 'I' "
+                    : ""}
                 ORDER BY created_at
                 ${ordering === 'recente' ? 'DESC' : 'ASC'}
                 OFFSET $2 LIMIT $3
