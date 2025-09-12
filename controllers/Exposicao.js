@@ -4,7 +4,8 @@ var utils = require('../utils/writer.js');
 var Exposicao = require('../service/ExposicaoService');
 
 module.exports.adicionarMiniaturaExposicao = function adicionarMiniaturaExposicao (req, res, next, body, expoId) {
-  Exposicao.adicionarMiniaturaExposicao(body, expoId)
+  const mimeType = req.headers['content-type'];
+  Exposicao.adicionarMiniaturaExposicao(body, expoId, req.userId, mimeType)
     .then(function (response) {
       utils.writeJson(res, response);
     })

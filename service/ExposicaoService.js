@@ -4,6 +4,7 @@ const Api403Error = require('../errorHandler/errors/api403Error');
 const Api404Error = require('../errorHandler/errors/api404Error');
 const repository = require('../repositories/ExposicaoRepository');
 const panelRepository = require('../repositories/PainelRepository');
+const fileManager = require('../utils/fileManager');
 
 /**
  * Adicionar uma imagem de miniatura a uma exposição
@@ -13,9 +14,21 @@ const panelRepository = require('../repositories/PainelRepository');
  * expoId Long ID da exposição cuja miniatura será atualizada
  * no response value expected for this operation
  **/
-exports.adicionarMiniaturaExposicao = function (body, expoId) {
+exports.adicionarMiniaturaExposicao = function (body, expoId, userId, mimeType) {
   return new Promise(function (resolve, reject) {
-    resolve();
+    repository.isAuthor(expoId, userId)
+      .then(data => {
+        if (!data) {
+          reject(new Api403Error("Usuário mão tem permissão de edição neste item."));
+        }
+        else {
+          fileManager.upload('underexpo-teste', 'expo-thumb-' + Date.now(), body, mimeType)
+          .then(uploadResult => {
+            repository.update(expoId, { thumbnail: uploadResult })
+            .then(resolve).catch(reject);
+          });
+        }
+      });
   });
 }
 

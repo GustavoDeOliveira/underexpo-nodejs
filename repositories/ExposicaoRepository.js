@@ -99,19 +99,23 @@ exports.update = async function (id, body) {
     const conn = await ConnectionManager.connect();
     try {
         if (conn) {
-            const set = [];
+            const columns = [];
             const values = [id];
             if (body.nome) {
-                set.push({name: 'name', value: body.nome});
+                columns.push('name');
                 values.push(body.nome);
             }
             if (body.descricao) {
-                set.push({name: 'description', value: body.descricao});
+                columns.push('description');
                 values.push(body.descricao);
+            }
+            if (body.thumbnail) {
+                columns.push('miniature_url');
+                values.push(body.thumbnail);
             }
             const query = `
             UPDATE exposition
-            SET ` + set.map((s, i) => `${s.name} = $${i+2}`).join(', ') +
+            SET ` + columns.map((c, i) => `${c} = $${i+2}`).join(', ') +
             `, updated_at = NOW() WHERE id = $1
             `;
             const result = await conn.query(query, values);

@@ -13,7 +13,7 @@ exports.upload = async (bucket, name, file, fileType) => new Promise((resolve, r
         if (error) {
           console.error(error);
         } else {
-          console.log('Successfully uploaded %s file %s:%s\n%o', fileType, name, bucket, data);
+          console.log('Envio bem sucedido de arquivo %s - %s:%s\n%o', fileType, name, bucket, data);
           return 'https://deaf-gold-mandrill.myfilebase.com/ipfs/' + data.ETag;
         }
     }).on('httpHeaders', (statusCode, headers) => {
