@@ -197,7 +197,7 @@ module.exports.removerContato = function removerContato (req, res, next, id) {
 };
 
 module.exports.removerNotificacao = function removerNotificacao (req, res, next, id) {
-  Perfil.removerNotificacao(id)
+  Perfil.removerNotificacao(id, req.userId)
     .then(function (response) {
       utils.writeJson(res, response);
     })

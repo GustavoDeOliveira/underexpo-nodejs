@@ -45,8 +45,9 @@ exports.read = async function (id) {
                 FROM invite i
                 INNER JOIN profile p ON i.invitee_id = p.id
                 WHERE i.exposition_id = $1
+                    AND UPPER(i.status) = UPPER($2)
                 `;
-                const inviteResult = await conn.query(inviteQuery, [expo.id]);
+                const inviteResult = await conn.query(inviteQuery, [expo.id, 'P']);
                 if (inviteResult.rowCount > 0) {
                     expo.invites = inviteResult.rows;
                 } else {

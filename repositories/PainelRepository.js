@@ -70,7 +70,7 @@ exports.update = async function (panelId, body) {
                 if (element.id && element.removendo) {
                     await deleteElement(element, conn);
                 } else if (element.id) {
-                    await updateElement(id, element, conn);
+                    await updateElement(element.id, element, conn);
                 } else {
                     await insertElement(element, panelId, conn);
                 }

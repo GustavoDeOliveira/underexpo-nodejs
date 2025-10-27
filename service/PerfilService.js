@@ -222,7 +222,7 @@ exports.buscarNotificacaoPorId = function(id) {
  **/
 exports.buscarNotificacoes = function(pagina,quantidade,userId) {
   return new Promise(function(resolve, reject) {
-    inviteRepository.readByUserId(userId)
+    inviteRepository.readByUserId(userId, 'P')
     .then(results => resolve(results.map(result => ({
       "id": result.id,
       "status": result.status,
@@ -366,9 +366,11 @@ exports.removerContato = function(id) {
  * id Long id do convite
  * no response value expected for this operation
  **/
-exports.removerNotificacao = function(id) {
+exports.removerNotificacao = function(id, userId) {
   return new Promise(function(resolve, reject) {
-    resolve();
+    const result = inviteRepository.reject(id, userId)
+    .then(response => resolve(response))
+    .catch(reason => reject(reason));
   });
 }
 
