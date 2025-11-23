@@ -166,7 +166,7 @@ paths:
         "200":
           description: operacao bem sucedida
         "400":
-          description: id fornecido é inválido
+          description: id ou dados fornecidos são inválidos
         "404":
           description: exposição não encontrada
       security:
@@ -274,6 +274,16 @@ paths:
       responses:
         "200":
           description: operacao bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResumoExposicao'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ResumoExposicao'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/ResumoExposicao'
         "400":
           description: id fornecido é inválido
         "404":
@@ -493,6 +503,103 @@ paths:
           description: exposição ou painel não encontrados
         "409":
           description: Não é permitido remover esse painel no momento
+      security:
+      - underexpoAuth: []
+      x-swagger-router-controller: Exposicao
+  /expo/{expoId}/painel/{painelId}/miniatura:
+    put:
+      tags:
+      - exposicao
+      summary: Adicionar uma imagem de miniatura a um painel
+      description: Carrega uma nova imagem como miniatura para o painel
+      operationId: adicionarMiniaturaPainel
+      parameters:
+      - name: expoId
+        in: path
+        description: ID da exposição cujo painel terá a miniatura atualizada
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      - name: painelId
+        in: path
+        description: ID do painel cuja miniatura será atualizada
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Imagem que será carregada como miniatura
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        "200":
+          description: operacao bem sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResumoPainel'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ResumoPainel'
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/ResumoPainel'
+        "400":
+          description: id fornecido é inválido
+        "404":
+          description: exposição não encontrada
+        "413":
+          description: conteúdo muito grande
+        "415":
+          description: tipo de mídia não suportado
+      security:
+      - underexpoAuth: []
+      x-swagger-router-controller: Exposicao
+    delete:
+      tags:
+      - exposicao
+      summary: Remover a imagem de miniatura de uma exposição
+      description: "Remove a imagem de miniatura do painel, caso possua"
+      operationId: removerMiniaturaPainel
+      parameters:
+      - name: expoId
+        in: path
+        description: ID da exposição cujo painel terá a miniatura removida
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      - name: painelId
+        in: path
+        description: ID do painel cuja miniatura será removida
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: operacao bem sucedida
+        "400":
+          description: id fornecido é inválido
+        "404":
+          description: exposição ou painel não encontrado, ou já não possuía miniatura
       security:
       - underexpoAuth: []
       x-swagger-router-controller: Exposicao
@@ -974,7 +1081,7 @@ paths:
       requestBody:
         description: Dados para atualização do canal de contato
         content:
-          aplication/json:
+          application/json:
             schema:
               $ref: '#/components/schemas/AtualizacaoContato'
       responses:
@@ -1466,9 +1573,11 @@ components:
         nome:
           type: string
           example: Exposição A
+          maxLength: 500
         descricao:
           type: string
           example: Lorem ipsum dolor sit amet.
+          maxLength: 10000
         paineis:
           type: array
           items:

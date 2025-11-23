@@ -4,7 +4,9 @@ const repository = require('../repositories/PerfilRepository');
 const inviteRepository = require('../repositories/ConviteRepository');
 const panelRepository = require('../repositories/PainelRepository');
 const workRepository = require('../repositories/ObraRepository');
+const contactRepository = require('../repositories/ContatoRepository');
 const fileManager = require('../utils/fileManager');
+const Api403Error = require('../errorHandler/errors/api403Error');
 
 /**
  * Aceitar um convite para exposição a partir de uma notificação
@@ -13,11 +15,11 @@ const fileManager = require('../utils/fileManager');
  * id Long id da notificação
  * no response value expected for this operation
  **/
-exports.aceitarConviteNotificacao = function(id) {
-  return new Promise(function(resolve, reject) {
+exports.aceitarConviteNotificacao = function (id) {
+  return new Promise(function (resolve, reject) {
     const result = inviteRepository.accept(id)
-    .then(response => resolve(response))
-    .catch(reason => reject(reason));
+      .then(response => resolve(response))
+      .catch(reason => reject(reason));
   });
 }
 
@@ -31,20 +33,17 @@ Deve ser de um formato suportado pelo tipo da obra
  * id Long ID da obra a qual o arquivo pertencerá
  * no response value expected for this operation
  **/
-exports.adicionarArquivoObra = function(body,id,mimeType) {
-  return new Promise(function(resolve, reject) {
-    fileManager.upload('underexpo-teste', 'work-' + Date.now(), body, mimeType)
-    .then(uploadResult => {
-      workRepository.update(id, uploadResult)
-      .then(result => resolve({
-        "tipo" : result.type,
-        "nome" : result.title,
-        "conteudo": result.content,
-        "id" : result.id,
-        "dataCarregamento" : result.created_at
-      })).catch(reject);
-    });
-  });
+exports.adicionarArquivoObra = async function (body, id, userId, mimeType) {
+  const work = await workRepository.readById(id, userId);
+  const uploadResult = await fileManager.upload(fileManager.buckets.default, work.filename, body, mimeType);
+  const result = await workRepository.update(id, { conteudo: uploadResult });
+  return {
+    "tipo": result.type,
+    "nome": result.title,
+    "conteudo": result.content,
+    "id": result.id,
+    "dataCarregamento": result.created_at
+  };
 }
 
 
@@ -55,17 +54,11 @@ exports.adicionarArquivoObra = function(body,id,mimeType) {
  * body NovoContato Dados de contato a serem cadastrados. (optional)
  * returns inline_response_201_1
  **/
-exports.adicionarContato = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-  "id" : 10002
-};
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+exports.adicionarContato = function (userId, body) {
+  return new Promise(function (resolve, reject) {
+    contactRepository.create(userId, body)
+      .then(resolve)
+      .catch(reject);
   });
 }
 
@@ -77,15 +70,15 @@ exports.adicionarContato = function(body) {
  * body NovaObra Dados da obra a ser carregada no acervo. (optional)
  * returns Obra
  **/
-exports.adicionarObra = function(userId, body) {
-  return new Promise(function(resolve, reject) {
+exports.adicionarObra = function (userId, body) {
+  return new Promise(function (resolve, reject) {
     workRepository.create(userId, body)
-    .then(result => resolve({
-      "tipo" : result.type,
-      "nome" : result.title,
-      "id" : result.id,
-      "dataCarregamento" : result.created_at
-    }));
+      .then(result => resolve({
+        "tipo": result.type,
+        "nome": result.title,
+        "id": result.id,
+        "dataCarregamento": result.created_at
+      }));
   });
 }
 
@@ -98,9 +91,11 @@ exports.adicionarObra = function(userId, body) {
  * id Long id do contato
  * no response value expected for this operation
  **/
-exports.atualizarContato = function(body,id) {
-  return new Promise(function(resolve, reject) {
-    resolve();
+exports.atualizarContato = function (body, id) {
+  return new Promise(function (resolve, reject) {
+    contactRepository.update(id, body)
+      .then(resolve)
+      .catch(reject);
   });
 }
 
@@ -113,18 +108,15 @@ exports.atualizarContato = function(body,id) {
  * id Long ID da obra a ser atualizada
  * no response value expected for this operation
  **/
-exports.atualizarObra = function(id) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-  "nome" : "Imagem A"
-};
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
+exports.atualizarObra = async function (body, id, userId) {
+  const isAuthor = await workRepository.isAuthor(id, userId);
+  if (!isAuthor)
+    throw new Api403Error("Usuário não tem permissão de edição neste item.");
+
+  const obra = await workRepository.update(id, body);
+  return {
+    "nome": obra.title
+  };
 }
 
 
@@ -135,15 +127,15 @@ exports.atualizarObra = function(id) {
  * id Long id da notificação
  * returns Contato
  **/
-exports.buscarContatoPorId = function(id) {
-  return new Promise(function(resolve, reject) {
+exports.buscarContatoPorId = function (id) {
+  return new Promise(function (resolve, reject) {
     var examples = {};
     examples['application/json'] = {
-  "link" : "http://www.instagram.com/meu.instagram",
-  "nome" : "@meu.instagram",
-  "id" : id,
-  "canal" : "Instagram"
-};
+      "link": "http://www.instagram.com/meu.instagram",
+      "nome": "@meu.instagram",
+      "id": id,
+      "canal": "Instagram"
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -161,25 +153,16 @@ exports.buscarContatoPorId = function(id) {
  * quantidade Integer Quantidade de registros a serem buscados
  * returns List
  **/
-exports.buscarContatos = function(pagina,quantidade) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "link" : "http://www.youtube.com/meu.youtube",
-  "nome" : "Meu Canal",
-  "id" : 10000,
-  "canal" : "YouTube"
-}, {
-  "link" : "http://www.instagram.com/meu.instagram",
-  "nome" : "@meu.instagram",
-  "id" : 10001,
-  "canal" : "Instagram"
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+exports.buscarContatos = function (userId, pagina, quantidade) {
+  return new Promise(function (resolve, reject) {
+    contactRepository.readByUserId(userId, pagina, quantidade)
+      .then(results => resolve(results.map(result => ({
+        "id": result.id,
+        "canal": result.channel,
+        "nome": result.name,
+        "link": result.url
+      }))))
+      .catch(reject);
   });
 }
 
@@ -191,18 +174,18 @@ exports.buscarContatos = function(pagina,quantidade) {
  * id Long id da notificação
  * returns Notificacao
  **/
-exports.buscarNotificacaoPorId = function(id) {
-  return new Promise(function(resolve, reject) {
+exports.buscarNotificacaoPorId = function (id) {
+  return new Promise(function (resolve, reject) {
     var examples = {};
     examples['application/json'] = {
-  "id" : 1001,
-  "expo" : {
-    "painelId" : 11,
-    "nome" : "Exposição A",
-    "id" : 10,
-    "organizador" : "artistaB"
-  }
-};
+      "id": 1001,
+      "expo": {
+        "painelId": 11,
+        "nome": "Exposição A",
+        "id": 10,
+        "organizador": "artistaB"
+      }
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -220,19 +203,19 @@ exports.buscarNotificacaoPorId = function(id) {
  * quantidade Integer Quantidade de registros a serem buscados
  * returns List
  **/
-exports.buscarNotificacoes = function(pagina,quantidade,userId) {
-  return new Promise(function(resolve, reject) {
+exports.buscarNotificacoes = function (pagina, quantidade, userId) {
+  return new Promise(function (resolve, reject) {
     inviteRepository.readByUserId(userId, 'P')
-    .then(results => resolve(results.map(result => ({
-      "id": result.id,
-      "status": result.status,
-      "expo": {
-        "id": result.expo_id,
-        "nome": result.expo_name,
-        "organizador": result.username
-      }
-    }))))
-    .catch(reject);
+      .then(results => resolve(results.map(result => ({
+        "id": result.id,
+        "status": result.status,
+        "expo": {
+          "id": result.expo_id,
+          "nome": result.expo_name,
+          "organizador": result.username
+        }
+      }))))
+      .catch(reject);
   });
 }
 
@@ -244,12 +227,12 @@ exports.buscarNotificacoes = function(pagina,quantidade,userId) {
  * chave String A palavra-chave para filtrar os resultados da busca
  * returns List
  **/
-exports.buscarPerfis = function(chave) {
-  return new Promise(function(resolve, reject) {
+exports.buscarPerfis = function (chave) {
+  return new Promise(function (resolve, reject) {
     repository.searchByUsername(chave)
-    .then(data => {
-      resolve(data.map(item => ({id: item.id, nome: item.username})));
-    }).catch(reason => reject(reason));
+      .then(data => {
+        resolve(data.map(item => ({ id: item.id, nome: item.username })));
+      }).catch(reason => reject(reason));
   });
 }
 
@@ -260,20 +243,20 @@ exports.buscarPerfis = function(chave) {
  *
  * returns List
  **/
-exports.carregarMeusPaineis = function(userId) {
-  return new Promise(function(resolve, reject) {
+exports.carregarMeusPaineis = function (userId) {
+  return new Promise(function (resolve, reject) {
     panelRepository.readByUserId(userId)
       .then(result => resolve(result.map(p => ({
-        "urlMiniatura" : p.minature_url,
-        "nome" : p.panel_name,
-        "id" : p.panel_id,
-        "autor" : p.panel_author,
-        "exposicao" : {
-          "urlMiniatura" : p.expo_miniature_url,
-          "nome" : p.expo_name,
-          "id" : p.expo_id,
-          "descricao" : p.expo_description,
-          "organizador" : p.expo_author
+        "urlMiniatura": p.panel_thumbnail_url,
+        "nome": p.panel_name,
+        "id": p.panel_id,
+        "autor": p.panel_author,
+        "exposicao": {
+          "urlMiniatura": p.expo_thumbnail_url,
+          "nome": p.expo_name,
+          "id": p.expo_id,
+          "descricao": p.expo_description,
+          "organizador": p.expo_author
         }
       })))).catch(reject);
   });
@@ -287,16 +270,16 @@ exports.carregarMeusPaineis = function(userId) {
  * id Long ID da obra a ser carregada
  * returns Obra
  **/
-exports.carregarObra = function(id) {
-  return new Promise(function(resolve, reject) {
+exports.carregarObra = function (id) {
+  return new Promise(function (resolve, reject) {
     var examples = {};
     examples['application/json'] = {
-  "tipo" : "imagem",
-  "nome" : "Imagem A",
-  "id" : 10,
-  "dataCarregamento" : "2000-01-23",
-  "url" : "https://picsum.photos/200"
-};
+      "tipo": "imagem",
+      "nome": "Imagem A",
+      "id": 10,
+      "dataCarregamento": "2000-01-23",
+      "url": "https://picsum.photos/200"
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -316,16 +299,16 @@ exports.carregarObra = function(id) {
  * ordenacao String Tipo de ordenacao para aplicar na busca (optional)
  * returns List
  **/
-exports.carregarObras = function(userId,pagina,quantidade,tipo,ordenacao) {
-  return new Promise(function(resolve, reject) {
+exports.carregarObras = function (userId, pagina, quantidade, tipo, ordenacao) {
+  return new Promise(function (resolve, reject) {
     workRepository.read(userId, pagina, quantidade, tipo, ordenacao)
-    .then(result => resolve(result.map(w => ({
-      "id" : w.id,
-      "tipo" : w.type,
-      "nome" : w.title,
-      "dataCarregamento" : w.created_at,
-      "url" : w.content
-    })))).catch(reject);
+      .then(result => resolve(result.map(w => ({
+        "id": w.id,
+        "tipo": w.type,
+        "nome": w.title,
+        "dataCarregamento": w.created_at,
+        "url": w.content
+      })))).catch(reject);
   });
 }
 0
@@ -337,11 +320,11 @@ exports.carregarObras = function(userId,pagina,quantidade,tipo,ordenacao) {
  * body NovaNotificacao Dados da exposição, painel e artista que será convidado. (optional)
  * returns ConviteExposicao
  **/
-exports.enviarNotificacao = function(body) {
-  return new Promise(function(resolve, reject) {
+exports.enviarNotificacao = function (body) {
+  return new Promise(function (resolve, reject) {
     inviteRepository.create(body)
-    .then(data => resolve({artista: data.username, expoId: data.expo_id, id: data.id}))
-    .catch(reason => reject(reason));
+      .then(data => resolve({ artista: data.username, expoId: data.expo_id, id: data.id }))
+      .catch(reason => reject(reason));
   });
 }
 
@@ -352,9 +335,11 @@ exports.enviarNotificacao = function(body) {
  * id Long id do contato
  * no response value expected for this operation
  **/
-exports.removerContato = function(id) {
-  return new Promise(function(resolve, reject) {
-    resolve();
+exports.removerContato = function (id) {
+  return new Promise(function (resolve, reject) {
+    contactRepository.delete(id)
+      .then(resolve)
+      .catch(reject);
   });
 }
 
@@ -366,11 +351,11 @@ exports.removerContato = function(id) {
  * id Long id do convite
  * no response value expected for this operation
  **/
-exports.removerNotificacao = function(id, userId) {
-  return new Promise(function(resolve, reject) {
+exports.removerNotificacao = function (id, userId) {
+  return new Promise(function (resolve, reject) {
     const result = inviteRepository.reject(id, userId)
-    .then(response => resolve(response))
-    .catch(reason => reject(reason));
+      .then(response => resolve(response))
+      .catch(reason => reject(reason));
   });
 }
 
@@ -382,9 +367,15 @@ exports.removerNotificacao = function(id, userId) {
  * id Long ID da obra a ser removida
  * no response value expected for this operation
  **/
-exports.removerObra = function(id) {
-  return new Promise(function(resolve, reject) {
-    resolve();
-  });
+exports.removerObra = async function (id, userId) {
+  const isAuthor = await workRepository.isAuthor(id, userId);
+  if (!isAuthor)
+    throw new Api403Error("Usuário não tem permissão de edição neste item.");
+
+  const work = await workRepository.readById(id, userId);
+
+  await fileManager.remove(fileManager.buckets.default, work.filename);
+
+  await workRepository.delete(id);
 }
 

@@ -10,7 +10,7 @@ function logErrorMiddleware(err, req, res, next) {
 }
 
 function returnError(err, req, res, next) {
-    res.status(err.statusCode || 500).send(err.message)
+    res.status(err.statusCode || 500).send({ erro: err.message})
 }
 
 function isOperationalError(error) {

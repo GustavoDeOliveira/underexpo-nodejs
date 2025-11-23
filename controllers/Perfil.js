@@ -17,7 +17,7 @@ module.exports.aceitarConviteNotificacao = function aceitarConviteNotificacao (r
 
 module.exports.adicionarArquivoObra = function adicionarArquivoObra (req, res, next, body, id) {
   const mimeType = req.headers['content-type'];
-  Perfil.adicionarArquivoObra(req.body, id, mimeType)
+  Perfil.adicionarArquivoObra(req.body, id, req.userId, mimeType)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -37,7 +37,7 @@ module.exports.adicionarContato = function adicionarContato (req, res, next, bod
 };
 
 module.exports.adicionarContato = function adicionarContato (req, res, next, body) {
-  Perfil.adicionarContato(body)
+  Perfil.adicionarContato(req.userId, body)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -67,7 +67,7 @@ module.exports.atualizarContato = function atualizarContato (req, res, next, bod
 };
 
 module.exports.atualizarObra = function atualizarObra (req, res, next, body, id) {
-  Perfil.atualizarObra(body, id)
+  Perfil.atualizarObra(body, id, req.userId)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -87,7 +87,7 @@ module.exports.buscarContatoPorId = function buscarContatoPorId (req, res, next,
 };
 
 module.exports.buscarContatos = function buscarContatos (req, res, next, pagina, quantidade) {
-  Perfil.buscarContatos(pagina, quantidade)
+  Perfil.buscarContatos(req.userId, pagina, quantidade)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -207,7 +207,7 @@ module.exports.removerNotificacao = function removerNotificacao (req, res, next,
 };
 
 module.exports.removerObra = function removerObra (req, res, next, id) {
-  Perfil.removerObra(id)
+  Perfil.removerObra(id, req.userId)
     .then(function (response) {
       utils.writeJson(res, response);
     })

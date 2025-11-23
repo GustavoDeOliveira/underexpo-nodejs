@@ -7,7 +7,6 @@ exports.validateTokenMiddleware = async function(req, res, next) {
     if (!auth && (req.path.endsWith('favicon.ico') || req.method === 'OPTIONS'
         || (req.path.endsWith('usuario') && (req.method === 'GET' || req.method === 'POST'))
         || (req.path.includes('v1/expo') && (req.method === 'GET'))
-        || (req.path.endsWith('contato') && (req.method === 'GET'))
         || (req.path.includes('painel/') && (req.method === 'GET')))
     ) {
         next();

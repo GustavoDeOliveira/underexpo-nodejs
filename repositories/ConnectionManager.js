@@ -3,6 +3,10 @@ const pg = require('pg');
 const { Pool } = pg;
 const pool = new Pool();
 
+//const supabaseUrl = process.env.SUPABASE_URL
+//const supabaseKey = process.env.SUPABASE_KEY
+//const supabase = createClient(supabaseUrl, supabaseKey)
+
 async function end(connection) {
     if (connection) {
         await connection.release();

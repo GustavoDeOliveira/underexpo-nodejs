@@ -59,7 +59,7 @@ for (let i = 2; i < openApiApp._router.stack.length; i++) {
 
 // Initialize the Swagger middleware
 http.createServer(app).listen(serverPort, function () {
-    console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
-    console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
+    console.log('Servidor na escuta na porta %d (http://localhost:%d)', serverPort, serverPort);
+    console.log('Swagger-ui disponível em http://localhost:%d/docs', serverPort);
 });
 

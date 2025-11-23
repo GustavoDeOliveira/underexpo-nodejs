@@ -14,6 +14,17 @@ module.exports.adicionarMiniaturaExposicao = function adicionarMiniaturaExposica
     });
 };
 
+module.exports.adicionarMiniaturaPainel = function adicionarMiniaturaPainel (req, res, next, body, expoId, painelId) {
+  const mimeType = req.headers['content-type'];
+  Exposicao.adicionarMiniaturaPainel(body, expoId, painelId, req.userId, mimeType)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
+};
+
 module.exports.atualizarExposicao = function atualizarExposicao (req, res, next, body, expoId) {
   body.userId = req.userId;
   Exposicao.atualizarExposicao(body, expoId)
@@ -76,16 +87,6 @@ module.exports.criarPainel = function criarPainel (req, res, next, body, expoId)
     });
 };
 
-module.exports.criarPainel = function criarPainel (req, res, next, body, expoId) {
-  Exposicao.criarPainel(body, expoId)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
-
 module.exports.denunciarExposicao = function denunciarExposicao (req, res, next, body, expoId) {
   Exposicao.denunciarExposicao(body, expoId)
     .then(function (response) {
@@ -107,7 +108,7 @@ module.exports.denunciarExposicao = function denunciarExposicao (req, res, next,
 };
 
 module.exports.excluirPainel = function excluirPainel (req, res, next, expoId, painelId) {
-  Exposicao.excluirPainel(expoId, painelId)
+  Exposicao.excluirPainel(expoId, painelId, req.userId)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -128,7 +129,7 @@ module.exports.organizarExposicao = function organizarExposicao (req, res, next,
 };
 
 module.exports.removerExposicao = function removerExposicao (req, res, next, expoId) {
-  Exposicao.removerExposicao(expoId)
+  Exposicao.removerExposicao(expoId, req.userId)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -139,6 +140,16 @@ module.exports.removerExposicao = function removerExposicao (req, res, next, exp
 
 module.exports.removerMiniaturaExposicao = function removerMiniaturaExposicao (req, res, next, expoId) {
   Exposicao.removerMiniaturaExposicao(expoId)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
+};
+
+module.exports.removerMiniaturaPainel = function removerMiniaturaPainel (req, res, next, expoId, painelId) {
+  Exposicao.removerMiniaturaPainel(expoId, painelId)
     .then(function (response) {
       utils.writeJson(res, response);
     })

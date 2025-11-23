@@ -1,7 +1,7 @@
 'use strict';
 const ConnectionManager = require('./ConnectionManager');
 
-exports.read = async function(userId, page, pageSize, filters, ordering) {
+exports.read = async function (userId, page, pageSize, filters, ordering) {
     const conn = await ConnectionManager.connect();
     try {
         if (conn) {
@@ -10,11 +10,11 @@ exports.read = async function(userId, page, pageSize, filters, ordering) {
                 SELECT id, title, type, created_at, content
                 FROM work
                 WHERE author_id = $1 
-                ${filters === 'audio' 
+                ${filters === 'audio'
                     ? "AND type = 'A' "
-                : filters === 'imagem' 
-                    ? "AND type = 'I' "
-                    : ""}
+                    : filters === 'imagem'
+                        ? "AND type = 'I' "
+                        : ""}
                 ORDER BY created_at
                 ${ordering === 'recente' ? 'DESC' : 'ASC'}
                 OFFSET $2 LIMIT $3
@@ -27,7 +27,69 @@ exports.read = async function(userId, page, pageSize, filters, ordering) {
     }
 }
 
-exports.create = async function(userId, {nome, tipo}) {
+exports.readById = async function (id, userId) {
+    const conn = await ConnectionManager.connect();
+    try {
+        if (conn) {
+            const values = [id, userId];
+            const query = `
+                SELECT id, created_at
+                FROM work
+                WHERE id = $1 AND author_id = $2
+            `;
+            const result = await conn.query(query, values);
+            if (result.rowCount < 1)
+                return null;
+
+            result.rows[0].filename = `work-${id}-${result.rows[0].created_at.getTime()}`;
+
+            return result.rows[0];
+        }
+    } finally {
+        ConnectionManager.end(conn);
+    }
+}
+
+exports.isAuthor = async function(id, userId) {
+    const conn = await ConnectionManager.connect();
+    try {
+        if (conn) {
+            const values = [id, userId];
+            const query = `
+            SELECT 1
+            FROM work
+            WHERE id = $1 AND author_id = $2
+            `;
+            const result = await conn.query(query, values);
+            return result.rowCount;
+        }
+    } finally {
+        ConnectionManager.end(conn);
+    }
+}
+
+exports.delete = async function (id) {
+    const conn = await ConnectionManager.connect();
+    try {
+        if (conn) {
+            const values = [id];
+            const query = `
+                DELETE FROM work WHERE id = $1
+            `;
+            ConnectionManager.begin(conn);
+            await conn.query(query, values);
+            ConnectionManager.commit(conn);
+        }
+    } catch (e) {
+        console.error('Ao deletar obra id %d: %o', id, e);
+        ConnectionManager.rollback(conn);
+
+    } finally {
+        ConnectionManager.end(conn);
+    }
+}
+
+exports.create = async function (userId, { nome, tipo }) {
     const conn = await ConnectionManager.connect();
     try {
         if (conn) {
@@ -57,15 +119,27 @@ exports.create = async function(userId, {nome, tipo}) {
     }
 }
 
-exports.update = async function(id, content) {
+exports.update = async function (id, body) {
     const conn = await ConnectionManager.connect();
     try {
         if (conn) {
-            const values = [content, id];
+            const set = [];
+            const values = [id];
+
+            if (body.conteudo) {
+                set.push('content');
+                values.push(body.conteudo);
+            }
+            if (body.nome) {
+                set.push('title');
+                values.push(body.nome);
+            }
+            
             const query = `
                 UPDATE work
-                SET content = $1, updated_at = NOW()
-                WHERE id = $2;`;
+                SET ` + set.map((s, i) => `${s} = $${i + 2}`).join(', ') +
+                `, updated_at = NOW()
+                WHERE id = $1;`;
             const result = await conn.query(query, values);
             if (result.rowCount === 1) {
                 const resultQuery = `
