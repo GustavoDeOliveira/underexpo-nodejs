@@ -1,0 +1,12 @@
+[build]
+  command = "echo 'No build command needed for functions only'" # Placeholder command
+  functions = "netlify/functions" # Specify the directory where your functions are located
+  publish = "public" # Or another directory if you have static assets
+[functions]
+  external_node_modules = ["express"]
+  node_bundler = "esbuild"
+[[redirects]]
+  force = true
+  from = "/api/*"
+  status = 200
+  to = "/.netlify/functions/api/:splat"
