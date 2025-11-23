@@ -4,7 +4,11 @@ const repository = require('../repositories/PerfilRepository');
 
 exports.validateTokenMiddleware = async function(req, res, next) {
     const auth = req.headers['x-user-key'];
-    if (!auth && (req.path.endsWith('favicon.ico') || req.method === 'OPTIONS'
+    if (!auth &&
+        (req.method === 'OPTIONS' || req.method === 'HEAD'
+        ||  req.path.endsWith('favicon.ico')
+        || (req.path.startsWith('/docs') && (req.method === 'GET'))
+        || (req.path.startsWith('/api-docs') && (req.method === 'GET'))
         || (req.path.endsWith('usuario') && (req.method === 'GET' || req.method === 'POST'))
         || (req.path.includes('v1/expo') && (req.method === 'GET'))
         || (req.path.includes('painel/') && (req.method === 'GET')))
