@@ -13,20 +13,19 @@ const jwtTokenValidator = require('./utils/authenticator');
 const serverPort = 8080;
 const environment = process.env.NODE_ENV || 'development';
 
+// CORS
+const corsOptions = { origin: process.env.CORS_ALLOWED_ORIGINS, methods: '*', allowedHeaders: 'Content-Type, api_key, Authorization, x-user-key' };
+
 // swaggerRouter configuration
 const options = {
     routing: {
         controllers: path.join(__dirname, './controllers')
     },
+    cors: corsOptions
 };
 
 const expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
 const app = expressAppConfig.getApp();
-
-// CORS
-const corsOptions = { origin: process.env.CORS_ALLOWED_ORIGINS, methods: '*', allowedHeaders: 'Content-Type, api_key, Authorization, x-user-key' }
-app.options(/.*/, cors(corsOptions));
-app.use(/.*/, cors(corsOptions));
 
 app.use(jwtTokenValidator.validateTokenMiddleware);
 
