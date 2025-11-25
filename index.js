@@ -22,9 +22,7 @@ const options = {
 };
 
 const expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
-const openApiApp = expressAppConfig.getApp();
-
-const app = express();
+const app = expressAppConfig.getApp();
 
 // Add headers
 app.use(/.*/, cors({ methods: '*', allowedHeaders: 'Content-Type, api_key, Authorization, x-user-key' }));
@@ -52,10 +50,6 @@ process.on('uncaughtException', error => {
         process.exit(1)
     }
 })
-
-for (let i = 2; i < openApiApp._router.stack.length; i++) {
-    app._router.stack.push(openApiApp._router.stack[i])
-}
 
 // Initialize the Swagger middleware
 http.createServer(app).listen(serverPort, function () {
