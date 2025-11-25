@@ -3,7 +3,6 @@
 const path = require('path');
 const http = require('http');
 const cors = require('cors');
-const express = require('express');
 const bodyParser = require( 'body-parser');
 
 const { logError, returnError, isOperationalError, logErrorMiddleware } = require('./errorHandler/ErrorHandler');
@@ -25,7 +24,7 @@ const expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/op
 const app = expressAppConfig.getApp();
 
 // Add headers
-app.use(/.*/, cors({ methods: '*', allowedHeaders: 'Content-Type, api_key, Authorization, x-user-key' }));
+app.use(/.*/, cors({ origin: process.env.CORS_ALLOWED_ORIGINS, methods: '*', allowedHeaders: 'Content-Type, api_key, Authorization, x-user-key' }));
 app.use(jwtTokenValidator.validateTokenMiddleware);
 
 app.use(logErrorMiddleware);
