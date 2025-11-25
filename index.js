@@ -23,8 +23,11 @@ const options = {
 const expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
 const app = expressAppConfig.getApp();
 
-// Add headers
-app.use(/.*/, cors({ origin: process.env.CORS_ALLOWED_ORIGINS, methods: '*', allowedHeaders: 'Content-Type, api_key, Authorization, x-user-key' }));
+// CORS
+const corsOptions = { origin: process.env.CORS_ALLOWED_ORIGINS, methods: '*', allowedHeaders: 'Content-Type, api_key, Authorization, x-user-key' }
+app.options(/.*/, cors(corsOptions));
+app.use(/.*/, cors(corsOptions));
+
 app.use(jwtTokenValidator.validateTokenMiddleware);
 
 app.use(logErrorMiddleware);
