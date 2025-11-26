@@ -14,6 +14,11 @@ const environment = process.env.NODE_ENV || 'development';
 
 const oasFilePath = path.join(__dirname, 'api/openapi.yaml');
 
+const bodyParserMiddleware = bodyParser.raw({
+    type: ['image/png', 'image/jpg', 'image/jpeg', 'image/*', 'audio/mp3', 'audio/wav', 'audio/*'],
+     limit: '10Mb'
+   });
+
 const expressAppConfig = oas3Tools.expressAppConfig(oasFilePath, {
     routing: {
         controllers: path.join(__dirname, './controllers'),
@@ -26,20 +31,13 @@ const expressAppConfig = oas3Tools.expressAppConfig(oasFilePath, {
     }),
     middleware: [
         tokenValidator.validateTokenMiddleware,
+        bodyParserMiddleware,
         logErrorMiddleware,
         returnError
     ]
 });
 
 const app = expressAppConfig.getApp();
-
-// The folowing line ensures that bodyParser will parse the image mime types
-// and we will be able to access it through req.body
-app.use(bodyParser.raw({
-    type: ['image/png', 'image/jpg', 'image/jpeg', 'image/*', 'audio/mp3', 'audio/wav', 'audio/*'],
-     limit: '10Mb'
-   }));
- 
 
 process.on('unhandledRejection', error => {
     throw error
