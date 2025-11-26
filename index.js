@@ -4,13 +4,10 @@ const path = require('path');
 const http = require('http');
 const cors = require('cors');
 const bodyParser = require( 'body-parser');
-const fs = require('fs');
-const YAML = require('js-yaml');
-
 const { logError, returnError, isOperationalError, logErrorMiddleware } = require('./errorHandler/ErrorHandler');
 
-const oas3Tools = require('oas3-tools-cors');
-const jwtTokenValidator = require('./utils/authenticator');
+const oas3Tools = require('oas3-tools-middleware-and-cors-fix');
+const tokenValidator = require('./utils/authenticator');
 
 const serverPort = process.env.PORT || 8080;
 const environment = process.env.NODE_ENV || 'development';
@@ -19,21 +16,22 @@ const oasFilePath = path.join(__dirname, 'api/openapi.yaml');
 
 const expressAppConfig = oas3Tools.expressAppConfig(oasFilePath, {
     routing: {
-        controllers: path.join(__dirname, './controllers')
+        controllers: path.join(__dirname, './controllers'),
+        
     },
     cors: cors({
         origin: process.env.CORS_ALLOWED_ORIGINS.split(','),
         methods: '*',
         allowedHeaders: 'Content-Type, api_key, Authorization, x-user-key'
-    })
+    }),
+    middleware: [
+        tokenValidator.validateTokenMiddleware,
+        logErrorMiddleware,
+        returnError
+    ]
 });
 
 const app = expressAppConfig.getApp();
-
-app.use(jwtTokenValidator.validateTokenMiddleware);
-
-app.use(logErrorMiddleware);
-app.use(returnError);
 
 // The folowing line ensures that bodyParser will parse the image mime types
 // and we will be able to access it through req.body
