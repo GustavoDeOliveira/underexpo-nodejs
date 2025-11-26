@@ -11,6 +11,9 @@ info:
   version: 0.0.1
 servers:
 - url: http://localhost:8080/api/v1
+  description: Local
+- url: https://underexpo-nodejs.onrender.com/api/v1
+  description: Render
 tags:
 - name: exposicao
   description: Informações e operações relacionadas às exposições

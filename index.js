@@ -4,27 +4,30 @@ const path = require('path');
 const http = require('http');
 const cors = require('cors');
 const bodyParser = require( 'body-parser');
+const fs = require('fs');
+const YAML = require('js-yaml');
 
 const { logError, returnError, isOperationalError, logErrorMiddleware } = require('./errorHandler/ErrorHandler');
 
-const oas3Tools = require('oas3-tools');
+const oas3Tools = require('oas3-tools-cors');
 const jwtTokenValidator = require('./utils/authenticator');
 
-const serverPort = 8080;
+const serverPort = process.env.PORT || 8080;
 const environment = process.env.NODE_ENV || 'development';
 
-// CORS
-const corsOptions = { origin: process.env.CORS_ALLOWED_ORIGINS, methods: '*', allowedHeaders: 'Content-Type, api_key, Authorization, x-user-key' };
+const oasFilePath = path.join(__dirname, 'api/openapi.yaml');
 
-// swaggerRouter configuration
-const options = {
+const expressAppConfig = oas3Tools.expressAppConfig(oasFilePath, {
     routing: {
         controllers: path.join(__dirname, './controllers')
     },
-    cors: corsOptions
-};
+    cors: cors({
+        origin: process.env.CORS_ALLOWED_ORIGINS,
+        methods: '*',
+        allowedHeaders: 'Content-Type, api_key, Authorization, x-user-key'
+    })
+});
 
-const expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
 const app = expressAppConfig.getApp();
 
 app.use(jwtTokenValidator.validateTokenMiddleware);
@@ -54,7 +57,9 @@ process.on('uncaughtException', error => {
 
 // Initialize the Swagger middleware
 http.createServer(app).listen(serverPort, function () {
-    console.log('Servidor na escuta na porta %d (http://localhost:%d)', serverPort, serverPort);
-    console.log('Swagger-ui disponível em http://localhost:%d/docs', serverPort);
+    if (environment === 'development') {
+        console.log('Servidor na escuta na porta %d (http://localhost:%d)', serverPort, serverPort);
+        console.log('Swagger-ui disponível em http://localhost:%d/docs', serverPort);
+    }
 });
 
