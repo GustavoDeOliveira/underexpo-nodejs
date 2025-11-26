@@ -22,7 +22,7 @@ const expressAppConfig = oas3Tools.expressAppConfig(oasFilePath, {
         controllers: path.join(__dirname, './controllers')
     },
     cors: cors({
-        origin: process.env.CORS_ALLOWED_ORIGINS,
+        origin: process.env.CORS_ALLOWED_ORIGINS.split(','),
         methods: '*',
         allowedHeaders: 'Content-Type, api_key, Authorization, x-user-key'
     })
