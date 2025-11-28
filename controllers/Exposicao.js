@@ -48,7 +48,7 @@ module.exports.atualizarPainel = function atualizarPainel (req, res, next, body,
 };
 
 module.exports.buscarExposicoesPublicadas = function buscarExposicoesPublicadas (req, res, next, pagina, quantidade) {
-  Exposicao.buscarExposicoesPublicadas(pagina, quantidade)
+  Exposicao.buscarExposicoesPublicadas(pagina, quantidade, req.userId)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -88,17 +88,7 @@ module.exports.criarPainel = function criarPainel (req, res, next, body, expoId)
 };
 
 module.exports.denunciarExposicao = function denunciarExposicao (req, res, next, body, expoId) {
-  Exposicao.denunciarExposicao(body, expoId)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
-
-module.exports.denunciarExposicao = function denunciarExposicao (req, res, next, body, expoId) {
-  Exposicao.denunciarExposicao(body, expoId)
+  Exposicao.denunciarExposicao(body, expoId, req.userId)
     .then(function (response) {
       utils.writeJson(res, response);
     })

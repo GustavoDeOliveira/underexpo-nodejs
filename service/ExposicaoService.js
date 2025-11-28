@@ -5,6 +5,7 @@ const Api403Error = require('../errorHandler/errors/api403Error');
 const Api404Error = require('../errorHandler/errors/api404Error');
 const repository = require('../repositories/ExposicaoRepository');
 const panelRepository = require('../repositories/PainelRepository');
+const reportRepository = require('../repositories/DenunciaRepository');
 const fileManager = require('../utils/fileManager');
 
 /**
@@ -153,9 +154,9 @@ exports.atualizarPainel = function (body, expoId, painelId) {
  * quantidade Integer Quantidade de registros a serem buscados
  * returns List
  **/
-exports.buscarExposicoesPublicadas = function (pagina, quantidade) {
+exports.buscarExposicoesPublicadas = function (pagina, quantidade, userId) {
   return new Promise(function (resolve, reject) {
-    repository.readPaged(pagina, quantidade)
+    repository.readPaged(pagina, quantidade, userId)
       .then(data => {
         resolve(data.map(item => ({
           urlMiniatura: item.thumbnail_url,
@@ -301,25 +302,8 @@ exports.criarPainel = function (body, expoId) {
  * expoId Long ID da exposição a ser denunciada
  * no response value expected for this operation
  **/
-exports.denunciarExposicao = function (body, expoId) {
-  return new Promise(function (resolve, reject) {
-    resolve();
-  });
-}
-
-
-/**
- * Denunciar uma exposição a partir do seu ID
- * Cria uma denúncia associada a exposição com o ID informado
- *
- * body NovaDenuncia Criar uma denúncia com uma descrição dos fatores ofensivos
- * expoId Long ID da exposição a ser denunciada
- * no response value expected for this operation
- **/
-exports.denunciarExposicao = function (body, expoId) {
-  return new Promise(function (resolve, reject) {
-    resolve();
-  });
+exports.denunciarExposicao = async function (body, expoId, userId) {
+  await reportRepository.create(expoId, userId, body.descricao);
 }
 
 

@@ -121,20 +121,26 @@ exports.readPanelThumbnailData = async function (expoId) {
     }
 }
 
-exports.readPaged = async function (page, pageSize) {
+exports.readPaged = async function (page, pageSize, userId) {
     const conn = await ConnectionManager.connect();
     try {
         if (conn) {
             const values = [(page - 1) * pageSize, pageSize];
+            if (userId) {
+                values[2] = userId;
+            }
             const query = `
         SELECT e.id, e.name, e.description, e.thumbnail_url, p.username
         FROM exposition e
         INNER JOIN profile p ON e.author_id = p.id
+        ${userId ? 'WHERE NOT EXISTS (SELECT 1 FROM report r WHERE r.exposition_id = e.id AND r.profile_id = $3)':''}
 		OFFSET $1 LIMIT $2
         `;
             const result = await conn.query(query, values);
             return result.rows;
         }
+    } catch (e) {
+        console.error(e);
     } finally {
         ConnectionManager.end(conn);
     }
