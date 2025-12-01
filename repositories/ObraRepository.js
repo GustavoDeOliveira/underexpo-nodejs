@@ -16,7 +16,7 @@ exports.read = async function (userId, page, pageSize, filters, ordering) {
                         ? "AND type = 'I' "
                         : ""}
                 ORDER BY created_at
-                ${ordering === 'recente' ? 'DESC' : 'ASC'}
+                ${ordering === 'recentes' ? 'DESC' : 'ASC'}
                 OFFSET $2 LIMIT $3
                 `;
             const result = await conn.query(query, values);

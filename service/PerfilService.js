@@ -40,7 +40,7 @@ exports.adicionarArquivoObra = async function (body, id, userId, mimeType) {
   return {
     "tipo": result.type,
     "nome": result.title,
-    "conteudo": result.content,
+    "url": result.content,
     "id": result.id,
     "dataCarregamento": result.created_at
   };
@@ -113,9 +113,13 @@ exports.atualizarObra = async function (body, id, userId) {
   if (!isAuthor)
     throw new Api403Error("Usuário não tem permissão de edição neste item.");
 
-  const obra = await workRepository.update(id, body);
+  const work = await workRepository.update(id, body);
   return {
-    "nome": obra.title
+    "tipo": work.type,
+    "nome": work.title,
+    "id": work.id,
+    "dataCarregamento": work.created_at,
+    "url": work.content
   };
 }
 
