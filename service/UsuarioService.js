@@ -1,6 +1,7 @@
 'use strict';
 
 const api404Error = require("../errorHandler/errors/api404Error");
+const api409Error = require("../errorHandler/errors/api409Error");
 const repository = require("../repositories/PerfilRepository");
 
 /**
@@ -40,20 +41,19 @@ exports.atualizarUsuario = function(body,id) {
  * body CriacaoUsuario Objeto do usuario criado (optional)
  * returns Usuario
  **/
-exports.criarUsuario = function(body) {
-  return new Promise(function(resolve, reject) {
-    repository.readByExternalId(body.chave)
-    .then(result => {
-      if (result) {
-        resolve({id: result, nome: body.nome});
-      } else {
-        repository.create(body)
-        .then(result => {
-          resolve({id: result, nome: body.nome});
-        }).catch(reason => reject(reason));
-      }
-    }).catch(reason => reject(reason))
-  });
+exports.criarUsuario = async function(body) {
+  const result = await repository.readByExternalId(body.chave);
+  
+  if (result) {
+    return {id: result, nome: body.nome};
+  } else {
+    const exists = await repository.existsByUsername(body.nome);
+
+    if (exists) throw new api409Error();
+
+    const id = await repository.create(body);
+    return {id, nome: body.nome};
+  }
 }
 
 /**

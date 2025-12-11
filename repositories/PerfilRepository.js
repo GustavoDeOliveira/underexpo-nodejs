@@ -41,6 +41,23 @@ exports.readByExternalId = async function (externalId) {
     }
 }
 
+exports.existsByUsername = async function (username) {
+    const conn = await ConnectionManager.connect();
+    try {
+        if (conn) {
+            const values = [username];
+            const query = "SELECT EXISTS (SELECT 1 FROM profile WHERE username = $1);";
+            const result = await conn.query(query, values);
+            if (result.rowCount === 1) {
+                return result.rows[0].exists;
+            }
+            return false;
+        }
+    } finally {
+        ConnectionManager.end(conn);
+    }
+}
+
 exports.searchByUsername = async function (keyword) {
     const conn = await ConnectionManager.connect();
     try {

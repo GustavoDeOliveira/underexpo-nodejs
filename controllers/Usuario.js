@@ -13,26 +13,6 @@ module.exports.atualizarUsuario = function atualizarUsuario (req, res, next, bod
     });
 };
 
-module.exports.atualizarUsuario = function atualizarUsuario (req, res, next, body, id) {
-  Usuario.atualizarUsuario(body, id)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
-
-module.exports.criarUsuario = function criarUsuario (req, res, next, body) {
-  Usuario.criarUsuario(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
-
 module.exports.criarUsuario = function criarUsuario (req, res, next, body) {
   Usuario.criarUsuario(body)
     .then(function (response) {
